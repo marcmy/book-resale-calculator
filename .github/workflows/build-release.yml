@@ -1,5 +1,7 @@
 name: Build and Release
 
+run-name: Build and release ${{ github.ref_name }}
+
 on:
   workflow_dispatch:
     inputs:
