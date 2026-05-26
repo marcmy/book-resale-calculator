@@ -22,6 +22,8 @@ The setup screen should ask for:
 - Seller ID
 - Marketplace ID
 
+The setup screen should explain that these are app/API values, not the seller's Amazon login. Keep the credential fields behind an "I already have the Amazon API app values" section so the app remains usable before Amazon authorization is complete.
+
 The client secret and refresh token must not be stored in `localStorage`, committed files, logs, or renderer-side JavaScript state.
 
 The first eligibility check should use `getListingsRestrictions` with:

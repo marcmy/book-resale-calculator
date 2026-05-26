@@ -115,12 +115,12 @@
     }
 
     if (status && status.configured) {
-      output.credentialStatus.textContent = "Saved";
+      output.credentialStatus.textContent = "Connected";
       setStatusTone(output.credentialStatus, null);
       return;
     }
 
-    output.credentialStatus.textContent = "Setup needed";
+    output.credentialStatus.textContent = "Optional setup";
     setStatusTone(output.credentialStatus, "warn");
   }
 
@@ -214,7 +214,7 @@
   function initCredentialControls(output) {
     output.credentialOpenButton.addEventListener("click", function () {
       output.credentialMessage.textContent = getDesktopCredentials()
-        ? "Enter the SP-API values from Seller Central."
+        ? "The calculator works without this. Amazon eligibility checks need a self-authorized SP-API app."
         : "Open the Electron desktop app to save credentials securely.";
       output.credentialDialog.showModal();
     });
@@ -243,7 +243,7 @@
         }
 
         clearCredentialInputs(output);
-        output.credentialMessage.textContent = "Credentials saved.";
+        output.credentialMessage.textContent = "Amazon setup saved.";
         setCredentialStatus(output, status);
         window.setTimeout(function () {
           output.credentialDialog.close();
@@ -266,7 +266,7 @@
       try {
         var status = await credentials.clear();
         clearCredentialInputs(output);
-        output.credentialMessage.textContent = "Saved credentials cleared.";
+        output.credentialMessage.textContent = "Saved Amazon setup cleared.";
         setCredentialStatus(output, status);
       } catch (error) {
         output.credentialMessage.textContent = "Could not clear credentials.";
@@ -502,9 +502,9 @@
       if (!status || !status.configured) {
         renderEligibilityResult(output, {
           severity: "warn",
-          label: getDesktopCredentials() ? "Setup needed" : "Desktop required",
+          label: getDesktopCredentials() ? "Amazon setup needed" : "Desktop required",
           message: getDesktopCredentials()
-            ? "Save Amazon SP-API credentials before checking eligibility."
+            ? "Amazon checks need a self-authorized SP-API app. The calculator still works without it."
             : "Open the Electron desktop app to check Amazon eligibility."
         });
         return;
