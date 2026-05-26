@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Book Resale Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="calculator" aria-labelledby="app-title">
+        <div class="header">
+          <div>
+            <p class="kicker">Book resale</p>
+            <h1 id="app-title">Book Resale Calculator</h1>
+          </div>
+          <div class="rate-stamp">
+            <span>USPS Media Mail</span>
+            <strong>Apr 26, 2026</strong>
+          </div>
+        </div>
+
+        <form class="workspace" id="calculator-form">
+          <fieldset class="panel inputs">
+            <legend>Inputs</legend>
+
+            <label class="field">
+              <span>Sell price</span>
+              <div class="money-input">
+                <span aria-hidden="true">$</span>
+                <input id="sell-price" name="sellPrice" type="number" min="0" step="0.01" value="100.00" inputmode="decimal">
+              </div>
+            </label>
+
+            <div class="split">
+              <label class="field">
+                <span>Fee percent</span>
+                <div class="suffix-input">
+                  <input id="fee-percent" name="feePercent" type="number" min="0" max="100" step="0.01" value="15" inputmode="decimal">
+                  <span aria-hidden="true">%</span>
+                </div>
+              </label>
+
+              <label class="field">
+                <span>Fixed fee</span>
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input id="fixed-fee" name="fixedFee" type="number" min="0" step="0.01" value="1.80" inputmode="decimal">
+                </div>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Shipping materials</span>
+              <div class="money-input">
+                <span aria-hidden="true">$</span>
+                <input id="materials-fee" name="materialsFee" type="number" min="0" step="0.01" value="0.50" inputmode="decimal">
+              </div>
+            </label>
+
+            <div class="split weight">
+              <label class="field">
+                <span>Pounds</span>
+                <input id="weight-lbs" name="weightLbs" type="number" min="0" step="1" value="1" inputmode="numeric">
+              </label>
+
+              <label class="field">
+                <span>Ounces</span>
+                <input id="weight-oz" name="weightOz" type="number" min="0" max="15.99" step="0.1" value="8" inputmode="decimal">
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Shipping</span>
+              <select id="shipping-mode" name="shippingMode">
+                <option value="media-mail">USPS Media Mail</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+
+            <label class="field custom-shipping" data-custom-shipping hidden>
+              <span>Custom shipping</span>
+              <div class="money-input">
+                <span aria-hidden="true">$</span>
+                <input id="custom-shipping" name="customShipping" type="number" min="0" step="0.01" value="0" inputmode="decimal">
+              </div>
+            </label>
+
+            <div class="split">
+              <label class="field">
+                <span>Buy cost</span>
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input id="buy-cost" name="buyCost" type="number" min="0" step="0.01" value="" placeholder="0.00" inputmode="decimal">
+                </div>
+              </label>
+
+              <label class="field">
+                <span>Target ROI</span>
+                <div class="suffix-input">
+                  <input id="target-roi" name="targetRoi" type="number" min="0" step="1" value="100" inputmode="numeric">
+                  <span aria-hidden="true">%</span>
+                </div>
+              </label>
+            </div>
+          </fieldset>
+
+          <section class="panel results" aria-labelledby="results-title">
+            <div class="results-head">
+              <div>
+                <p class="kicker">After fees and shipping</p>
+                <h2 id="results-title">Net before book cost</h2>
+              </div>
+              <output class="net-value" id="net-value" for="sell-price fee-percent fixed-fee materials-fee weight-lbs weight-oz shipping-mode custom-shipping">$0.00</output>
+            </div>
+
+            <div class="stat-grid">
+              <div class="stat">
+                <span>Max buy at target ROI</span>
+                <strong id="target-buy">$0.00</strong>
+              </div>
+              <div class="stat">
+                <span>Total fees and costs</span>
+                <strong id="total-costs">$0.00</strong>
+              </div>
+              <div class="stat">
+                <span>Profit after buy cost</span>
+                <strong id="profit-value">$0.00</strong>
+              </div>
+              <div class="stat">
+                <span>ROI after buy cost</span>
+                <strong id="roi-value">N/A</strong>
+              </div>
+            </div>
+
+            <dl class="line-items">
+              <div>
+                <dt>Percentage fee</dt>
+                <dd id="percentage-fee">$0.00</dd>
+              </div>
+              <div>
+                <dt>Fixed fee</dt>
+                <dd id="fixed-fee-output">$0.00</dd>
+              </div>
+              <div>
+                <dt>Shipping materials</dt>
+                <dd id="materials-fee-output">$0.00</dd>
+              </div>
+              <div>
+                <dt>Shipping cost</dt>
+                <dd id="shipping-cost">$0.00</dd>
+              </div>
+              <div>
+                <dt>Billable weight</dt>
+                <dd id="billable-weight">0 lb</dd>
+              </div>
+            </dl>
+
+            <div class="actions">
+              <button type="button" id="copy-summary">Copy summary</button>
+              <button type="reset" class="secondary">Reset</button>
+            </div>
+          </section>
+        </form>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
