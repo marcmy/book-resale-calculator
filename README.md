@@ -33,6 +33,8 @@ npm install
 npm start
 ```
 
+In the desktop app, use **Setup** next to Amazon credentials to save SP-API values through the operating system credential store. The app keeps those secrets out of browser local storage and out of committed files.
+
 Build a Windows installer with:
 
 ```bash

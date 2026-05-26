@@ -13,7 +13,7 @@ v2 is the path for:
 
 ## Amazon integration notes
 
-Douglas has a Professional Seller account, so a private SP-API application is viable. The app should keep the LWA client secret and refresh token out of browser JavaScript. For a personal desktop tool, store credentials in the operating system credential store or an encrypted local config, then call Amazon from a local backend process.
+Douglas has a Professional Seller account, so a private SP-API application is viable. The app should keep the LWA client secret and refresh token out of browser JavaScript. For a personal desktop tool, store credentials in the operating system credential store through the Electron main process, then call Amazon from that native process.
 
 The setup screen should ask for:
 

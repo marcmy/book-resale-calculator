@@ -63,12 +63,20 @@
             <legend>Inputs</legend>
 
             <div class="amazon-check">
-              <label class="field">
-                <span>ISBN or ASIN</span>
-                <input id="product-id" name="productId" type="text" value="" placeholder="978..." autocomplete="off" inputmode="text">
-              </label>
+              <div class="credential-strip">
+                <div>
+                  <span>Amazon credentials</span>
+                  <strong id="credential-status">Checking</strong>
+                </div>
+                <button type="button" class="secondary" id="open-credentials">Setup</button>
+              </div>
 
-              <div class="split">
+              <div class="amazon-entry-row">
+                <label class="field">
+                  <span>ISBN or ASIN</span>
+                  <input id="product-id" name="productId" type="text" value="" placeholder="978..." autocomplete="off" inputmode="text">
+                </label>
+
                 <label class="field">
                   <span>Condition</span>
                   <select id="condition-type" name="conditionType">
@@ -231,6 +239,52 @@
         </form>
       </section>
     </main>
+
+    <dialog class="credential-dialog" id="credential-dialog" aria-labelledby="credential-title">
+      <form class="credential-form" method="dialog">
+        <div>
+          <p class="kicker">Amazon setup</p>
+          <h2 id="credential-title">SP-API credentials</h2>
+        </div>
+
+        <p class="form-note">Secrets are saved by the desktop app through the operating system credential store. They are not stored in browser local storage.</p>
+
+        <label class="field">
+          <span>LWA client ID</span>
+          <input id="credential-lwa-client-id" type="text" autocomplete="off" spellcheck="false">
+        </label>
+
+        <label class="field">
+          <span>LWA client secret</span>
+          <input id="credential-lwa-client-secret" type="password" autocomplete="new-password" spellcheck="false">
+        </label>
+
+        <label class="field">
+          <span>LWA refresh token</span>
+          <input id="credential-lwa-refresh-token" type="password" autocomplete="new-password" spellcheck="false">
+        </label>
+
+        <div class="split">
+          <label class="field">
+            <span>Seller ID</span>
+            <input id="credential-seller-id" type="text" autocomplete="off" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>Marketplace ID</span>
+            <input id="credential-marketplace-id" type="text" value="ATVPDKIKX0DER" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+
+        <p class="credential-message" id="credential-message" role="status"></p>
+
+        <div class="dialog-actions">
+          <button type="button" class="secondary" id="clear-credentials">Clear saved</button>
+          <button type="button" class="secondary" id="close-credentials">Cancel</button>
+          <button type="button" id="save-credentials">Save credentials</button>
+        </div>
+      </form>
+    </dialog>
 
     <script src="rates.js"></script>
     <script src="script.js"></script>

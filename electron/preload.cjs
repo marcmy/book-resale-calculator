@@ -1,6 +1,11 @@
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("bookResaleDesktop", {
   platform: process.platform,
-  amazonEligibilityAvailable: false
+  amazonEligibilityAvailable: false,
+  credentials: {
+    getStatus: () => ipcRenderer.invoke("credentials:getStatus"),
+    save: (credentials) => ipcRenderer.invoke("credentials:save", credentials),
+    clear: () => ipcRenderer.invoke("credentials:clear")
+  }
 });

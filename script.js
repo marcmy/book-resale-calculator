@@ -92,6 +92,140 @@
     }
   }
 
+  function getDesktopCredentials() {
+    return window.bookResaleDesktop && window.bookResaleDesktop.credentials
+      ? window.bookResaleDesktop.credentials
+      : null;
+  }
+
+  function setStatusTone(element, tone) {
+    element.classList.toggle("is-warn", tone === "warn");
+    element.classList.toggle("is-negative", tone === "negative");
+  }
+
+  function setCredentialStatus(output, status) {
+    if (!output.credentialStatus) {
+      return;
+    }
+
+    if (!getDesktopCredentials()) {
+      output.credentialStatus.textContent = "Desktop app only";
+      setStatusTone(output.credentialStatus, "warn");
+      return;
+    }
+
+    if (status && status.configured) {
+      output.credentialStatus.textContent = "Saved";
+      setStatusTone(output.credentialStatus, null);
+      return;
+    }
+
+    output.credentialStatus.textContent = "Setup needed";
+    setStatusTone(output.credentialStatus, "warn");
+  }
+
+  async function refreshCredentialStatus(output) {
+    var credentials = getDesktopCredentials();
+
+    if (!credentials) {
+      setCredentialStatus(output, null);
+      return null;
+    }
+
+    try {
+      var status = await credentials.getStatus();
+      setCredentialStatus(output, status);
+      return status;
+    } catch (error) {
+      output.credentialStatus.textContent = "Storage error";
+      setStatusTone(output.credentialStatus, "negative");
+      return null;
+    }
+  }
+
+  function collectCredentialValues(output) {
+    return {
+      lwaClientId: output.credentialLwaClientId.value,
+      lwaClientSecret: output.credentialLwaClientSecret.value,
+      lwaRefreshToken: output.credentialLwaRefreshToken.value,
+      sellerId: output.credentialSellerId.value,
+      marketplaceId: output.credentialMarketplaceId.value
+    };
+  }
+
+  function clearCredentialInputs(output) {
+    output.credentialLwaClientId.value = "";
+    output.credentialLwaClientSecret.value = "";
+    output.credentialLwaRefreshToken.value = "";
+    output.credentialSellerId.value = "";
+    output.credentialMarketplaceId.value = "ATVPDKIKX0DER";
+  }
+
+  function initCredentialControls(output) {
+    output.credentialOpenButton.addEventListener("click", function () {
+      output.credentialMessage.textContent = getDesktopCredentials()
+        ? "Enter the SP-API values from Seller Central."
+        : "Open the Electron desktop app to save credentials securely.";
+      output.credentialDialog.showModal();
+    });
+
+    output.credentialCloseButton.addEventListener("click", function () {
+      output.credentialDialog.close();
+    });
+
+    output.credentialSaveButton.addEventListener("click", async function () {
+      var credentials = getDesktopCredentials();
+
+      if (!credentials) {
+        output.credentialMessage.textContent = "Credential storage is only available in the desktop app.";
+        return;
+      }
+
+      output.credentialMessage.textContent = "Saving...";
+
+      try {
+        var status = await credentials.save(collectCredentialValues(output));
+
+        if (!status.configured) {
+          output.credentialMessage.textContent = "Missing: " + status.missing.join(", ");
+          setCredentialStatus(output, status);
+          return;
+        }
+
+        clearCredentialInputs(output);
+        output.credentialMessage.textContent = "Credentials saved.";
+        setCredentialStatus(output, status);
+        window.setTimeout(function () {
+          output.credentialDialog.close();
+        }, 500);
+      } catch (error) {
+        output.credentialMessage.textContent = "Could not save credentials.";
+      }
+    });
+
+    output.credentialClearButton.addEventListener("click", async function () {
+      var credentials = getDesktopCredentials();
+
+      if (!credentials) {
+        output.credentialMessage.textContent = "Credential storage is only available in the desktop app.";
+        return;
+      }
+
+      output.credentialMessage.textContent = "Clearing...";
+
+      try {
+        var status = await credentials.clear();
+        clearCredentialInputs(output);
+        output.credentialMessage.textContent = "Saved credentials cleared.";
+        setCredentialStatus(output, status);
+      } catch (error) {
+        output.credentialMessage.textContent = "Could not clear credentials.";
+      }
+    });
+
+    refreshCredentialStatus(output);
+  }
+
   function initThemeControls() {
     var controls = Array.prototype.slice.call(document.querySelectorAll("input[name='theme']"));
     var savedChoice = getSavedThemeChoice();
@@ -243,11 +377,25 @@
       shippingCost: document.getElementById("shipping-cost"),
       billableWeight: document.getElementById("billable-weight"),
       mediaMailEffective: document.querySelector("[data-media-mail-effective]"),
+      credentialStatus: document.getElementById("credential-status"),
+      credentialOpenButton: document.getElementById("open-credentials"),
+      credentialDialog: document.getElementById("credential-dialog"),
+      credentialMessage: document.getElementById("credential-message"),
+      credentialSaveButton: document.getElementById("save-credentials"),
+      credentialClearButton: document.getElementById("clear-credentials"),
+      credentialCloseButton: document.getElementById("close-credentials"),
+      credentialLwaClientId: document.getElementById("credential-lwa-client-id"),
+      credentialLwaClientSecret: document.getElementById("credential-lwa-client-secret"),
+      credentialLwaRefreshToken: document.getElementById("credential-lwa-refresh-token"),
+      credentialSellerId: document.getElementById("credential-seller-id"),
+      credentialMarketplaceId: document.getElementById("credential-marketplace-id"),
       eligibilityValue: document.getElementById("eligibility-value"),
       eligibilityButton: document.getElementById("check-eligibility"),
       copyButton: document.getElementById("copy-summary")
     };
     var lastResult = calculate(DEFAULTS);
+
+    initCredentialControls(output);
 
     function render() {
       var values = formValues(form);
@@ -283,19 +431,27 @@
       window.setTimeout(render, 0);
     });
 
-    output.eligibilityButton.addEventListener("click", function () {
+    output.eligibilityButton.addEventListener("click", async function () {
       var values = formValues(form);
       var productId = (values.productId || "").trim();
 
-      output.eligibilityValue.classList.remove("is-warn");
+      setStatusTone(output.eligibilityValue, null);
 
       if (!productId) {
         output.eligibilityValue.textContent = "Enter ISBN/ASIN";
-        output.eligibilityValue.classList.add("is-warn");
+        setStatusTone(output.eligibilityValue, "warn");
         return;
       }
 
-      output.eligibilityValue.textContent = "Not configured";
+      var status = await refreshCredentialStatus(output);
+
+      if (!status || !status.configured) {
+        output.eligibilityValue.textContent = getDesktopCredentials() ? "Setup needed" : "Desktop required";
+        setStatusTone(output.eligibilityValue, "warn");
+        return;
+      }
+
+      output.eligibilityValue.textContent = "API pending";
     });
 
     output.copyButton.addEventListener("click", function () {
