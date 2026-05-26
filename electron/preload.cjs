@@ -7,5 +7,8 @@ contextBridge.exposeInMainWorld("bookResaleDesktop", {
     getStatus: () => ipcRenderer.invoke("credentials:getStatus"),
     save: (credentials) => ipcRenderer.invoke("credentials:save", credentials),
     clear: () => ipcRenderer.invoke("credentials:clear")
+  },
+  amazon: {
+    checkEligibility: (request) => ipcRenderer.invoke("amazon:checkEligibility", request)
   }
 });

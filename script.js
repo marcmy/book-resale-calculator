@@ -153,6 +153,54 @@
     };
   }
 
+  function formatCheckedAt(value) {
+    if (!value) {
+      return "";
+    }
+
+    var date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit"
+    }).format(date);
+  }
+
+  function getAmazonClient() {
+    return window.bookResaleDesktop && window.bookResaleDesktop.amazon
+      ? window.bookResaleDesktop.amazon
+      : null;
+  }
+
+  function renderEligibilityResult(output, result) {
+    var severity = result && result.severity;
+    var checkedAt = result && result.checkedAt ? formatCheckedAt(result.checkedAt) : "";
+    var context = "";
+
+    output.eligibilityValue.textContent = result && result.label ? result.label : "Could not verify";
+    setStatusTone(output.eligibilityValue, severity === "negative" ? "negative" : severity === "warn" ? "warn" : null);
+
+    if (result && result.asin) {
+      context = result.asin;
+    }
+
+    if (result && result.conditionLabel) {
+      context += (context ? " · " : "") + result.conditionLabel;
+    }
+
+    if (checkedAt) {
+      context += (context ? " · " : "") + checkedAt;
+    }
+
+    output.eligibilityDetail.textContent = result && result.message
+      ? result.message + (context ? " (" + context + ")" : "")
+      : context;
+  }
+
   function clearCredentialInputs(output) {
     output.credentialLwaClientId.value = "";
     output.credentialLwaClientSecret.value = "";
@@ -390,6 +438,7 @@
       credentialSellerId: document.getElementById("credential-seller-id"),
       credentialMarketplaceId: document.getElementById("credential-marketplace-id"),
       eligibilityValue: document.getElementById("eligibility-value"),
+      eligibilityDetail: document.getElementById("eligibility-detail"),
       eligibilityButton: document.getElementById("check-eligibility"),
       copyButton: document.getElementById("copy-summary")
     };
@@ -438,20 +487,53 @@
       setStatusTone(output.eligibilityValue, null);
 
       if (!productId) {
-        output.eligibilityValue.textContent = "Enter ISBN/ASIN";
-        setStatusTone(output.eligibilityValue, "warn");
+        renderEligibilityResult(output, {
+          severity: "warn",
+          label: "Enter ISBN/ASIN",
+          message: "Enter a product identifier before checking Amazon."
+        });
         return;
       }
 
       var status = await refreshCredentialStatus(output);
 
       if (!status || !status.configured) {
-        output.eligibilityValue.textContent = getDesktopCredentials() ? "Setup needed" : "Desktop required";
-        setStatusTone(output.eligibilityValue, "warn");
+        renderEligibilityResult(output, {
+          severity: "warn",
+          label: getDesktopCredentials() ? "Setup needed" : "Desktop required",
+          message: getDesktopCredentials()
+            ? "Save Amazon SP-API credentials before checking eligibility."
+            : "Open the Electron desktop app to check Amazon eligibility."
+        });
         return;
       }
 
-      output.eligibilityValue.textContent = "API pending";
+      if (!getAmazonClient()) {
+        renderEligibilityResult(output, {
+          severity: "warn",
+          label: "Desktop required",
+          message: "Open the Electron desktop app to check Amazon eligibility."
+        });
+        return;
+      }
+
+      renderEligibilityResult(output, {
+        label: "Checking...",
+        message: "Contacting Amazon."
+      });
+
+      try {
+        renderEligibilityResult(output, await getAmazonClient().checkEligibility({
+          productId: productId,
+          conditionType: values.conditionType
+        }));
+      } catch (error) {
+        renderEligibilityResult(output, {
+          severity: "warn",
+          label: "Could not verify",
+          message: "The Amazon eligibility check did not complete."
+        });
+      }
     });
 
     output.copyButton.addEventListener("click", function () {

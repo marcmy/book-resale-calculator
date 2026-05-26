@@ -1,6 +1,7 @@
 const path = require("node:path");
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const keytar = require("keytar");
+const { checkListingsEligibility, toSafeErrorResult } = require("./sp-api.cjs");
 
 const CREDENTIAL_SERVICE = "Book Resale Calculator Amazon SP-API";
 const CREDENTIAL_FIELDS = [
@@ -31,6 +32,16 @@ async function getCredentialStatus() {
     configured: missing.length === 0,
     missing
   };
+}
+
+async function getStoredCredentials() {
+  const credentials = {};
+
+  for (const [key] of CREDENTIAL_FIELDS) {
+    credentials[key] = await keytar.getPassword(CREDENTIAL_SERVICE, key);
+  }
+
+  return credentials;
 }
 
 function registerCredentialHandlers() {
@@ -73,6 +84,26 @@ function registerCredentialHandlers() {
     }
 
     return getCredentialStatus();
+  });
+
+  ipcMain.handle("amazon:checkEligibility", async (_event, request) => {
+    const status = await getCredentialStatus();
+
+    if (!status.configured) {
+      return {
+        status: "setup_needed",
+        severity: "warn",
+        label: "Setup needed",
+        message: "Save Amazon SP-API credentials before checking eligibility.",
+        missing: status.missing
+      };
+    }
+
+    try {
+      return await checkListingsEligibility(await getStoredCredentials(), request || {});
+    } catch (error) {
+      return toSafeErrorResult(error);
+    }
   });
 }
 
