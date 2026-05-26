@@ -4,6 +4,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Book Resale Calculator</title>
+    <script>
+      (function () {
+        var savedTheme = "auto";
+
+        try {
+          savedTheme = localStorage.getItem("bookResaleTheme") || "auto";
+        } catch (error) {
+          savedTheme = "auto";
+        }
+
+        if (savedTheme !== "light" && savedTheme !== "dark") {
+          savedTheme = "auto";
+        }
+
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = savedTheme === "auto" ? (prefersDark ? "dark" : "light") : savedTheme;
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themeChoice = savedTheme;
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -14,15 +35,65 @@
             <p class="kicker">Book resale</p>
             <h1 id="app-title">Book Resale Calculator</h1>
           </div>
-          <div class="rate-stamp">
-            <span>USPS Media Mail</span>
-            <strong data-media-mail-effective>Loading rates</strong>
+          <div class="header-tools">
+            <div class="theme-setting" role="radiogroup" aria-label="Theme">
+              <span>Theme</span>
+              <label>
+                <input type="radio" name="theme" value="auto">
+                <span>Auto</span>
+              </label>
+              <label>
+                <input type="radio" name="theme" value="light">
+                <span>Light</span>
+              </label>
+              <label>
+                <input type="radio" name="theme" value="dark">
+                <span>Dark</span>
+              </label>
+            </div>
+            <div class="rate-stamp">
+              <span>USPS Media Mail</span>
+              <strong data-media-mail-effective>Loading rates</strong>
+            </div>
           </div>
         </div>
 
         <form class="workspace" id="calculator-form">
           <fieldset class="panel inputs">
             <legend>Inputs</legend>
+
+            <div class="amazon-check">
+              <div class="credential-strip">
+                <div>
+                  <span>Amazon credentials</span>
+                  <strong id="credential-status">Checking</strong>
+                </div>
+                <button type="button" class="secondary" id="open-credentials">Setup</button>
+              </div>
+
+              <div class="amazon-entry-row">
+                <label class="field">
+                  <span>ISBN or ASIN</span>
+                  <input id="product-id" name="productId" type="text" value="" placeholder="978..." autocomplete="off" inputmode="text">
+                </label>
+
+                <label class="field">
+                  <span>Condition</span>
+                  <select id="condition-type" name="conditionType">
+                    <option value="used_good">Used - Good</option>
+                    <option value="used_very_good">Used - Very Good</option>
+                    <option value="used_like_new">Used - Like New</option>
+                    <option value="used_acceptable">Used - Acceptable</option>
+                    <option value="collectible_good">Collectible - Good</option>
+                    <option value="new_new">New</option>
+                  </select>
+                </label>
+
+                <div class="eligibility-action">
+                  <button type="button" id="check-eligibility">Check Amazon</button>
+                </div>
+              </div>
+            </div>
 
             <label class="field">
               <span>Sell price</span>
@@ -116,6 +187,11 @@
 
             <div class="stat-grid">
               <div class="stat">
+                <span>Amazon currently reports</span>
+                <strong id="eligibility-value">Not checked</strong>
+                <small id="eligibility-detail"></small>
+              </div>
+              <div class="stat">
                 <span>Max buy at target ROI</span>
                 <strong id="target-buy">$0.00</strong>
               </div>
@@ -164,6 +240,52 @@
         </form>
       </section>
     </main>
+
+    <dialog class="credential-dialog" id="credential-dialog" aria-labelledby="credential-title">
+      <form class="credential-form" method="dialog">
+        <div>
+          <p class="kicker">Amazon setup</p>
+          <h2 id="credential-title">SP-API credentials</h2>
+        </div>
+
+        <p class="form-note">Secrets are saved by the desktop app through the operating system credential store. They are not stored in browser local storage.</p>
+
+        <label class="field">
+          <span>LWA client ID</span>
+          <input id="credential-lwa-client-id" type="text" autocomplete="off" spellcheck="false">
+        </label>
+
+        <label class="field">
+          <span>LWA client secret</span>
+          <input id="credential-lwa-client-secret" type="password" autocomplete="new-password" spellcheck="false">
+        </label>
+
+        <label class="field">
+          <span>LWA refresh token</span>
+          <input id="credential-lwa-refresh-token" type="password" autocomplete="new-password" spellcheck="false">
+        </label>
+
+        <div class="split">
+          <label class="field">
+            <span>Seller ID</span>
+            <input id="credential-seller-id" type="text" autocomplete="off" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>Marketplace ID</span>
+            <input id="credential-marketplace-id" type="text" value="ATVPDKIKX0DER" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+
+        <p class="credential-message" id="credential-message" role="status"></p>
+
+        <div class="dialog-actions">
+          <button type="button" class="secondary" id="clear-credentials">Clear saved</button>
+          <button type="button" class="secondary" id="close-credentials">Cancel</button>
+          <button type="button" id="save-credentials">Save credentials</button>
+        </div>
+      </form>
+    </dialog>
 
     <script src="rates.js"></script>
     <script src="script.js"></script>
