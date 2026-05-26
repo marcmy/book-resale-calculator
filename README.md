@@ -5,6 +5,7 @@ A small standalone calculator for quick book resale math.
 Open `index.html` in a browser and enter:
 
 - Sell price
+- ISBN or ASIN and book condition
 - Percentage fee and fixed fee
 - Shipping materials fee
 - Book weight in pounds and ounces
@@ -21,4 +22,19 @@ Run the updater locally with:
 
 ```bash
 node scripts/update-usps-media-mail-rates.js
+```
+
+## Desktop app
+
+The v2 branch runs in Electron:
+
+```bash
+npm install
+npm start
+```
+
+Build a Windows installer with:
+
+```bash
+npm run build:win
 ```

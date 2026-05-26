@@ -5,7 +5,8 @@ The v1 release stays as a static browser calculator.
 v2 is the path for:
 
 - A Windows desktop app build.
-- Secure local storage for Amazon SP-API credentials.
+- Credential setup that asks for Amazon SP-API values once.
+- Secure local storage for Amazon SP-API secrets.
 - ISBN or ASIN lookup input.
 - Amazon listing eligibility checks with the Listings Restrictions API.
 - Clear result language such as "Amazon currently reports" instead of absolute sell/no-sell claims.
@@ -13,6 +14,16 @@ v2 is the path for:
 ## Amazon integration notes
 
 Douglas has a Professional Seller account, so a private SP-API application is viable. The app should keep the LWA client secret and refresh token out of browser JavaScript. For a personal desktop tool, store credentials in the operating system credential store or an encrypted local config, then call Amazon from a local backend process.
+
+The setup screen should ask for:
+
+- LWA client ID
+- LWA client secret
+- LWA refresh token
+- Seller ID
+- Marketplace ID
+
+The client secret and refresh token must not be stored in `localStorage`, committed files, logs, or renderer-side JavaScript state.
 
 The first eligibility check should use `getListingsRestrictions` with:
 

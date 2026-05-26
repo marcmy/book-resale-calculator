@@ -189,6 +189,8 @@
   function formValues(form) {
     var data = new FormData(form);
     return {
+      productId: data.get("productId"),
+      conditionType: data.get("conditionType"),
       sellPrice: data.get("sellPrice"),
       feePercent: data.get("feePercent"),
       fixedFee: data.get("fixedFee"),
@@ -241,6 +243,8 @@
       shippingCost: document.getElementById("shipping-cost"),
       billableWeight: document.getElementById("billable-weight"),
       mediaMailEffective: document.querySelector("[data-media-mail-effective]"),
+      eligibilityValue: document.getElementById("eligibility-value"),
+      eligibilityButton: document.getElementById("check-eligibility"),
       copyButton: document.getElementById("copy-summary")
     };
     var lastResult = calculate(DEFAULTS);
@@ -277,6 +281,21 @@
     form.addEventListener("change", render);
     form.addEventListener("reset", function () {
       window.setTimeout(render, 0);
+    });
+
+    output.eligibilityButton.addEventListener("click", function () {
+      var values = formValues(form);
+      var productId = (values.productId || "").trim();
+
+      output.eligibilityValue.classList.remove("is-warn");
+
+      if (!productId) {
+        output.eligibilityValue.textContent = "Enter ISBN/ASIN";
+        output.eligibilityValue.classList.add("is-warn");
+        return;
+      }
+
+      output.eligibilityValue.textContent = "Not configured";
     });
 
     output.copyButton.addEventListener("click", function () {

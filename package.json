@@ -1,0 +1,41 @@
+{
+  "name": "book-resale-calculator",
+  "version": "2.0.0-alpha.0",
+  "description": "Desktop book resale calculator with USPS Media Mail rates and Amazon eligibility planning.",
+  "author": "marcmy",
+  "main": "electron/main.cjs",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "check": "node scripts/check-calculator.js",
+    "update:usps": "node scripts/update-usps-media-mail-rates.js",
+    "build:win": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.marcmy.bookresalecalculator",
+    "productName": "Book Resale Calculator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "script.js",
+      "rates.js",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  }
+}

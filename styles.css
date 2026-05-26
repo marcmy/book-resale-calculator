@@ -235,6 +235,18 @@ legend {
   font-weight: 750;
 }
 
+.amazon-check {
+  display: grid;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eligibility-action {
+  display: grid;
+  align-content: end;
+}
+
 input,
 select {
   width: 100%;
@@ -248,6 +260,10 @@ select {
 
 input {
   padding: 0 12px;
+}
+
+input[type="text"] {
+  text-transform: uppercase;
 }
 
 select {
