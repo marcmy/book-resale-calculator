@@ -185,7 +185,9 @@
     setStatusTone(output.eligibilityValue, severity === "negative" ? "negative" : severity === "warn" ? "warn" : null);
 
     if (result && result.asin) {
-      context = result.asin;
+      context = result.sourceIdentifierType === "ISBN" && result.sourceIdentifier
+        ? result.sourceIdentifier + " -> " + result.asin
+        : result.asin;
     }
 
     if (result && result.conditionLabel) {
@@ -395,10 +397,10 @@
     var profitText = result.profit === null ? "N/A" : money(result.profit);
 
     return [
-      "Sell price: " + money(result.sellPrice),
-      "Percentage fee: " + money(result.percentageFee),
-      "Fixed fee: " + money(result.fixedFee),
-      "Shipping materials: " + money(result.materialsFee),
+      "Asking Price: " + money(result.sellPrice),
+      "Referral Fee: " + money(result.percentageFee),
+      "Variable Closing Fee: " + money(result.fixedFee),
+      "Shipping Materials: " + money(result.materialsFee),
       "Shipping: " + money(result.shippingCost) + " (" + result.billablePounds + " lb billable)",
       "Total fees and costs: " + money(result.totalCosts),
       "Net before book cost: " + money(result.netBeforeBookCost),

@@ -2,15 +2,24 @@ const LWA_TOKEN_URL = "https://api.amazon.com/auth/o2/token";
 const USER_AGENT = "BookResaleCalculator/2.0 (Language=JavaScript)";
 
 const CONDITION_LABELS = {
-  new_new: "New",
-  used_like_new: "Used - Like New",
-  used_very_good: "Used - Very Good",
-  used_good: "Used - Good",
-  used_acceptable: "Used - Acceptable",
-  collectible_like_new: "Collectible - Like New",
-  collectible_very_good: "Collectible - Very Good",
-  collectible_good: "Collectible - Good",
-  collectible_acceptable: "Collectible - Acceptable"
+  new: "New",
+  used: "Used",
+  collectible: "Collectible"
+};
+
+const AMAZON_CONDITION_TYPES = {
+  new: "new_new",
+  used: "used_good",
+  collectible: "collectible_good",
+  new_new: "new_new",
+  used_like_new: "used_like_new",
+  used_very_good: "used_very_good",
+  used_good: "used_good",
+  used_acceptable: "used_acceptable",
+  collectible_like_new: "collectible_like_new",
+  collectible_very_good: "collectible_very_good",
+  collectible_good: "collectible_good",
+  collectible_acceptable: "collectible_acceptable"
 };
 
 const MARKETPLACE_ENDPOINTS = {
@@ -49,8 +58,36 @@ function normalizeAsin(value) {
   return /^[A-Z0-9]{10}$/.test(normalized) ? normalized : null;
 }
 
+function normalizeIsbn(value) {
+  const normalized = String(value || "").trim().toUpperCase().replace(/[-\s]/g, "");
+
+  if (/^\d{13}$/.test(normalized) || /^\d{9}[\dX]$/.test(normalized)) {
+    return normalized;
+  }
+
+  return null;
+}
+
 function normalizeCondition(value) {
-  return Object.prototype.hasOwnProperty.call(CONDITION_LABELS, value) ? value : "used_good";
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (Object.prototype.hasOwnProperty.call(CONDITION_LABELS, normalized)) {
+    return normalized;
+  }
+
+  if (normalized.startsWith("new")) {
+    return "new";
+  }
+
+  if (normalized.startsWith("collectible")) {
+    return "collectible";
+  }
+
+  return "used";
+}
+
+function toAmazonConditionType(value) {
+  return AMAZON_CONDITION_TYPES[value] || AMAZON_CONDITION_TYPES[normalizeCondition(value)];
 }
 
 function getEndpointForMarketplace(marketplaceId) {
@@ -125,10 +162,105 @@ function buildRestrictionsUrl(credentials, request) {
   url.searchParams.set("asin", request.asin);
   url.searchParams.set("sellerId", credentials.sellerId);
   url.searchParams.set("marketplaceIds", credentials.marketplaceId);
-  url.searchParams.set("conditionType", request.conditionType);
+  url.searchParams.set("conditionType", toAmazonConditionType(request.conditionType));
   url.searchParams.set("reasonLocale", "en_US");
 
   return url;
+}
+
+function buildCatalogSearchUrl(credentials, request) {
+  const endpoint = getEndpointForMarketplace(credentials.marketplaceId);
+  const url = new URL("/catalog/2022-04-01/items", endpoint);
+
+  url.searchParams.set("identifiers", request.isbn);
+  url.searchParams.set("identifiersType", "ISBN");
+  url.searchParams.set("marketplaceIds", credentials.marketplaceId);
+  url.searchParams.set("includedData", "identifiers,summaries");
+
+  return url;
+}
+
+function interpretCatalogSearch(body, isbn) {
+  const items = Array.isArray(body && body.items) ? body.items : [];
+  const firstItem = items.find((item) => item && item.asin);
+
+  if (!firstItem) {
+    return null;
+  }
+
+  const summaries = Array.isArray(firstItem.summaries) ? firstItem.summaries : [];
+
+  return {
+    asin: firstItem.asin,
+    sourceIdentifier: isbn,
+    sourceIdentifierType: "ISBN",
+    title: summaries[0] && summaries[0].itemName ? summaries[0].itemName : ""
+  };
+}
+
+async function searchCatalogByIsbn(credentials, isbn, accessToken, fetchImpl) {
+  const url = buildCatalogSearchUrl(credentials, { isbn });
+  const response = await fetchImpl(url, {
+    headers: {
+      accept: "application/json",
+      "user-agent": USER_AGENT,
+      "x-amz-access-token": accessToken
+    }
+  });
+  const responseBody = await readResponseBody(response);
+
+  if (!response.ok) {
+    throw new SpApiError(getErrorMessage(responseBody, "Amazon could not look up that ISBN."), {
+      phase: "catalogSearch",
+      status: response.status
+    });
+  }
+
+  return interpretCatalogSearch(responseBody, isbn);
+}
+
+async function resolveAsin(credentials, request, accessToken, fetchImpl) {
+  const productId = String(request.productId || "").trim();
+  const asin = normalizeAsin(productId);
+
+  if (asin) {
+    return {
+      asin,
+      sourceIdentifier: asin,
+      sourceIdentifierType: "ASIN",
+      title: ""
+    };
+  }
+
+  const isbn = normalizeIsbn(productId);
+
+  if (!isbn) {
+    return {
+      error: {
+        status: "identifier_invalid",
+        severity: "warn",
+        label: "Check identifier",
+        message: "Enter a 10-character ASIN or a valid ISBN."
+      }
+    };
+  }
+
+  const catalogMatch = await searchCatalogByIsbn(credentials, isbn, accessToken, fetchImpl);
+
+  if (!catalogMatch) {
+    return {
+      error: {
+        status: "isbn_not_found",
+        severity: "warn",
+        label: "ISBN not found",
+        message: "Amazon did not return an ASIN for this ISBN.",
+        sourceIdentifier: isbn,
+        sourceIdentifierType: "ISBN"
+      }
+    };
+  }
+
+  return catalogMatch;
 }
 
 function flattenReasons(restrictions) {
@@ -161,6 +293,9 @@ function interpretRestrictions(body, context) {
   const restrictions = Array.isArray(body && body.restrictions) ? body.restrictions : [];
   const base = {
     asin: context.asin,
+    sourceIdentifier: context.sourceIdentifier,
+    sourceIdentifierType: context.sourceIdentifierType,
+    title: context.title,
     conditionType: context.conditionType,
     conditionLabel: CONDITION_LABELS[context.conditionType],
     marketplaceId: context.marketplaceId,
@@ -210,20 +345,20 @@ function interpretRestrictions(body, context) {
 
 async function checkListingsEligibility(credentials, request, options) {
   const fetchImpl = (options && options.fetch) || fetch;
-  const asin = normalizeAsin(request.productId);
+  const conditionType = normalizeCondition(request.conditionType);
+  const accessToken = await getAccessToken(credentials, fetchImpl);
+  const resolved = await resolveAsin(credentials, request, accessToken, fetchImpl);
 
-  if (!asin) {
+  if (resolved.error) {
     return {
-      status: "asin_required",
-      severity: "warn",
-      label: "ASIN needed",
-      message: "Eligibility checks currently require a 10-character ASIN. ISBN lookup is next."
+      ...resolved.error,
+      conditionType,
+      conditionLabel: CONDITION_LABELS[conditionType],
+      checkedAt: new Date().toISOString()
     };
   }
 
-  const conditionType = normalizeCondition(request.conditionType);
-  const accessToken = await getAccessToken(credentials, fetchImpl);
-  const url = buildRestrictionsUrl(credentials, { asin, conditionType });
+  const url = buildRestrictionsUrl(credentials, { asin: resolved.asin, conditionType });
   const response = await fetchImpl(url, {
     headers: {
       accept: "application/json",
@@ -241,7 +376,10 @@ async function checkListingsEligibility(credentials, request, options) {
   }
 
   return interpretRestrictions(responseBody, {
-    asin,
+    asin: resolved.asin,
+    sourceIdentifier: resolved.sourceIdentifier,
+    sourceIdentifierType: resolved.sourceIdentifierType,
+    title: resolved.title,
     conditionType,
     marketplaceId: credentials.marketplaceId
   });
@@ -272,12 +410,17 @@ function toSafeErrorResult(error) {
 }
 
 module.exports = {
+  AMAZON_CONDITION_TYPES,
   CONDITION_LABELS,
   MARKETPLACE_ENDPOINTS,
+  buildCatalogSearchUrl,
   buildRestrictionsUrl,
   checkListingsEligibility,
   interpretRestrictions,
+  normalizeIsbn,
   normalizeAsin,
   normalizeCondition,
+  resolveAsin,
+  toAmazonConditionType,
   toSafeErrorResult
 };

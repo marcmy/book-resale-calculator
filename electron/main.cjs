@@ -114,6 +114,7 @@ function createWindow() {
     minWidth: 920,
     minHeight: 900,
     title: "Book Resale Calculator",
+    icon: path.join(__dirname, "..", "build", "icon.ico"),
     backgroundColor: "#f5f7fa",
     webPreferences: {
       contextIsolation: true,

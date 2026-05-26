@@ -60,7 +60,7 @@ select {
 }
 
 .calculator {
-  width: min(1080px, 100%);
+  width: min(1480px, 100%);
 }
 
 .header,
@@ -76,15 +76,6 @@ select {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   margin-bottom: 10px;
-}
-
-.kicker {
-  margin: 0 0 6px;
-  color: var(--green);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 h1,
@@ -189,7 +180,7 @@ h2 {
 }
 
 .workspace {
-  grid-template-columns: minmax(290px, 0.95fr) minmax(320px, 1.25fr);
+  grid-template-columns: minmax(360px, 0.95fr) minmax(460px, 1.25fr);
   align-items: start;
 }
 
@@ -244,7 +235,7 @@ legend {
 
 .amazon-entry-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.58fr) auto;
+  grid-template-columns: minmax(180px, 1.35fr) minmax(130px, 0.65fr) auto;
   align-items: end;
   gap: 12px;
 }
@@ -377,7 +368,7 @@ select:focus {
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
 
@@ -550,6 +541,12 @@ button.secondary:hover {
 
   .net-value {
     min-width: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .workspace {
+    grid-template-columns: minmax(520px, 0.95fr) minmax(620px, 1.25fr);
   }
 }
 

@@ -35,7 +35,7 @@ npm start
 
 In the desktop app, use **Setup** next to Amazon credentials to save SP-API values through the operating system credential store. The app keeps those secrets out of browser local storage and out of committed files.
 
-Amazon eligibility checks currently require a 10-character ASIN. ISBN lookup is planned next.
+Amazon eligibility checks accept an ASIN directly, or an ISBN that the app resolves through Amazon Catalog Items before checking Listings Restrictions.
 
 Build a Windows installer with:
 

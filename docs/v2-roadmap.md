@@ -7,8 +7,7 @@ v2 is the path for:
 - A Windows desktop app build.
 - Credential setup that asks for Amazon SP-API values once.
 - Secure local storage for Amazon SP-API secrets.
-- ASIN eligibility checks with the Listings Restrictions API.
-- ISBN-to-ASIN lookup.
+- ASIN and ISBN eligibility checks with Catalog Items and Listings Restrictions APIs.
 - Clear result language such as "Amazon currently reports" instead of absolute sell/no-sell claims.
 
 ## Amazon integration notes
