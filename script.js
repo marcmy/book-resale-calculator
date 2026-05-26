@@ -65,6 +65,58 @@
     }).format(date);
   }
 
+  function getSavedThemeChoice() {
+    try {
+      return localStorage.getItem("bookResaleTheme") || "auto";
+    } catch (error) {
+      return "auto";
+    }
+  }
+
+  function resolveTheme(choice) {
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    return choice === "auto" ? (prefersDark ? "dark" : "light") : choice;
+  }
+
+  function applyThemeChoice(choice) {
+    var normalizedChoice = choice === "light" || choice === "dark" ? choice : "auto";
+
+    document.documentElement.dataset.themeChoice = normalizedChoice;
+    document.documentElement.dataset.theme = resolveTheme(normalizedChoice);
+
+    try {
+      localStorage.setItem("bookResaleTheme", normalizedChoice);
+    } catch (error) {
+      // Theme preference still works for the current session if storage is unavailable.
+    }
+  }
+
+  function initThemeControls() {
+    var controls = Array.prototype.slice.call(document.querySelectorAll("input[name='theme']"));
+    var savedChoice = getSavedThemeChoice();
+    var systemPreference = window.matchMedia
+      ? window.matchMedia("(prefers-color-scheme: dark)")
+      : null;
+
+    controls.forEach(function (control) {
+      control.checked = control.value === savedChoice;
+      control.addEventListener("change", function () {
+        if (control.checked) {
+          applyThemeChoice(control.value);
+        }
+      });
+    });
+
+    if (systemPreference && systemPreference.addEventListener) {
+      systemPreference.addEventListener("change", function () {
+        if (getSavedThemeChoice() === "auto") {
+          applyThemeChoice("auto");
+        }
+      });
+    }
+  }
+
   function toNumber(value, fallback) {
     var number = Number.parseFloat(value);
     return Number.isFinite(number) ? number : fallback;
@@ -173,6 +225,8 @@
   }
 
   function init() {
+    initThemeControls();
+
     var form = document.getElementById("calculator-form");
     var customShipping = document.querySelector("[data-custom-shipping]");
     var output = {

@@ -9,6 +9,7 @@ Open `index.html` in a browser and enter:
 - Shipping materials fee
 - Book weight in pounds and ounces
 - Optional buy cost and target ROI
+- Auto, light, and dark themes
 
 The shipping table uses USPS Media Mail retail rates from Notice 123. Any fraction of a pound is rounded up to the next billable pound.
 

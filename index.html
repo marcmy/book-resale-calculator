@@ -4,6 +4,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Book Resale Calculator</title>
+    <script>
+      (function () {
+        var savedTheme = "auto";
+
+        try {
+          savedTheme = localStorage.getItem("bookResaleTheme") || "auto";
+        } catch (error) {
+          savedTheme = "auto";
+        }
+
+        if (savedTheme !== "light" && savedTheme !== "dark") {
+          savedTheme = "auto";
+        }
+
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = savedTheme === "auto" ? (prefersDark ? "dark" : "light") : savedTheme;
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themeChoice = savedTheme;
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -14,9 +35,26 @@
             <p class="kicker">Book resale</p>
             <h1 id="app-title">Book Resale Calculator</h1>
           </div>
-          <div class="rate-stamp">
-            <span>USPS Media Mail</span>
-            <strong data-media-mail-effective>Loading rates</strong>
+          <div class="header-tools">
+            <div class="theme-setting" role="radiogroup" aria-label="Theme">
+              <span>Theme</span>
+              <label>
+                <input type="radio" name="theme" value="auto">
+                <span>Auto</span>
+              </label>
+              <label>
+                <input type="radio" name="theme" value="light">
+                <span>Light</span>
+              </label>
+              <label>
+                <input type="radio" name="theme" value="dark">
+                <span>Dark</span>
+              </label>
+            </div>
+            <div class="rate-stamp">
+              <span>USPS Media Mail</span>
+              <strong data-media-mail-effective>Loading rates</strong>
+            </div>
           </div>
         </div>
 
