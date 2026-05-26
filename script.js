@@ -1,15 +1,9 @@
 (function () {
   "use strict";
 
-  var MEDIA_MAIL_RATES = [
-    4.47, 5.22, 5.97, 6.72, 7.47, 8.22, 8.97, 9.72, 10.47, 11.22,
-    11.97, 12.72, 13.47, 14.22, 14.97, 15.72, 16.47, 17.22, 17.97, 18.72,
-    19.47, 20.22, 20.97, 21.72, 22.47, 23.22, 23.97, 24.72, 25.47, 26.22,
-    26.97, 27.72, 28.47, 29.22, 29.97, 30.72, 31.47, 32.22, 32.97, 33.72,
-    34.47, 35.22, 35.97, 36.72, 37.47, 38.22, 38.97, 39.72, 40.47, 41.22,
-    41.97, 42.72, 43.47, 44.22, 44.97, 45.72, 46.47, 47.22, 47.97, 48.72,
-    49.47, 50.22, 50.97, 51.72, 52.47, 53.22, 53.97, 54.72, 55.47, 56.22
-  ];
+  var root = typeof globalThis !== "undefined" ? globalThis : window;
+  var MEDIA_MAIL_RATE_DATA = getRateData();
+  var MEDIA_MAIL_RATES = MEDIA_MAIL_RATE_DATA.rates;
 
   var DEFAULTS = {
     sellPrice: 100,
@@ -23,6 +17,20 @@
     buyCost: null,
     targetRoi: 100
   };
+
+  function getRateData() {
+    var rateData = root.USPS_MEDIA_MAIL;
+
+    if (!rateData && typeof require !== "undefined") {
+      rateData = require("./rates.js");
+    }
+
+    if (!rateData || !Array.isArray(rateData.rates) || rateData.rates.length === 0) {
+      throw new Error("USPS Media Mail rates are not available.");
+    }
+
+    return rateData;
+  }
 
   function money(value) {
     var normalized = Number.isFinite(value) ? value : 0;
@@ -40,6 +48,21 @@
     return new Intl.NumberFormat("en-US", {
       maximumFractionDigits: 1
     }).format(value) + "%";
+  }
+
+  function formatEffectiveDate(value) {
+    var date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value || "Rates unavailable";
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC"
+    }).format(date);
   }
 
   function toNumber(value, fallback) {
@@ -163,6 +186,7 @@
       materialsFee: document.getElementById("materials-fee-output"),
       shippingCost: document.getElementById("shipping-cost"),
       billableWeight: document.getElementById("billable-weight"),
+      mediaMailEffective: document.querySelector("[data-media-mail-effective]"),
       copyButton: document.getElementById("copy-summary")
     };
     var lastResult = calculate(DEFAULTS);
@@ -185,6 +209,10 @@
       output.materialsFee.textContent = money(result.materialsFee);
       output.shippingCost.textContent = money(result.shippingCost);
       output.billableWeight.textContent = result.billablePounds + " lb";
+
+      if (output.mediaMailEffective) {
+        output.mediaMailEffective.textContent = formatEffectiveDate(MEDIA_MAIL_RATE_DATA.effectiveDate);
+      }
 
       setTone(output.netValue, result.netBeforeBookCost);
       setTone(output.targetBuy, result.targetBuyPrice);
@@ -214,18 +242,22 @@
   }
 
   if (typeof window !== "undefined") {
-    window.BookMarginCalculator = {
+    var api = {
+      RATE_DATA: MEDIA_MAIL_RATE_DATA,
       MEDIA_MAIL_RATES: MEDIA_MAIL_RATES,
       calculate: calculate,
       getBillablePounds: getBillablePounds,
       getMediaMailCost: getMediaMailCost
     };
 
+    window.BookResaleCalculator = api;
+    window.BookMarginCalculator = api;
     window.addEventListener("DOMContentLoaded", init);
   }
 
   if (typeof module !== "undefined") {
     module.exports = {
+      RATE_DATA: MEDIA_MAIL_RATE_DATA,
       MEDIA_MAIL_RATES: MEDIA_MAIL_RATES,
       calculate: calculate,
       getBillablePounds: getBillablePounds,
