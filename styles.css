@@ -60,7 +60,7 @@ select {
 }
 
 .calculator {
-  width: min(1080px, 100%);
+  width: min(1480px, 100%);
 }
 
 .header,
@@ -76,15 +76,6 @@ select {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   margin-bottom: 10px;
-}
-
-.kicker {
-  margin: 0 0 6px;
-  color: var(--green);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 h1,
@@ -189,7 +180,7 @@ h2 {
 }
 
 .workspace {
-  grid-template-columns: minmax(290px, 0.95fr) minmax(320px, 1.25fr);
+  grid-template-columns: minmax(360px, 0.95fr) minmax(460px, 1.25fr);
   align-items: start;
 }
 
@@ -244,7 +235,7 @@ legend {
 
 .amazon-entry-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.58fr) auto;
+  grid-template-columns: minmax(180px, 1.35fr) minmax(130px, 0.65fr) auto;
   align-items: end;
   gap: 12px;
 }
@@ -377,7 +368,7 @@ select:focus {
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
 
@@ -496,12 +487,15 @@ button.secondary:hover {
 }
 
 .credential-dialog {
-  width: min(620px, calc(100vw - 32px));
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
   color: var(--text);
   box-shadow: var(--shadow);
+  overflow: auto;
 }
 
 .credential-dialog::backdrop {
@@ -510,9 +504,93 @@ button.secondary:hover {
 
 .credential-form {
   display: grid;
-  gap: 16px;
+  gap: 10px;
   margin: 0;
-  padding: 8px;
+  padding: 0;
+}
+
+.dialog-eyebrow {
+  margin: 0 0 6px;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.setup-warning {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(168, 95, 0, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 200, 87, 0.12);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.setup-checklist {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.setup-checklist h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.setup-checklist ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 18px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.credential-details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.credential-details summary {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.credential-details summary::marker {
+  color: var(--green);
+}
+
+.credential-details summary small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.credential-fields {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 10px;
+}
+
+.credential-dialog input[type="text"] {
+  text-transform: none;
+}
+
+.credential-dialog input,
+.credential-dialog button {
+  min-height: 40px;
 }
 
 .form-note,
@@ -523,7 +601,7 @@ button.secondary:hover {
 
 .dialog-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
 }
 
@@ -550,6 +628,12 @@ button.secondary:hover {
 
   .net-value {
     min-width: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .workspace {
+    grid-template-columns: minmax(520px, 0.95fr) minmax(620px, 1.25fr);
   }
 }
 

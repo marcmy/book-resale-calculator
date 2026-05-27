@@ -25,6 +25,7 @@
         document.documentElement.dataset.themeChoice = savedTheme;
       })();
     </script>
+    <link rel="icon" href="build/icon.ico">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -32,7 +33,6 @@
       <section class="calculator" aria-labelledby="app-title">
         <div class="header">
           <div>
-            <p class="kicker">Book resale</p>
             <h1 id="app-title">Book Resale Calculator</h1>
           </div>
           <div class="header-tools">
@@ -65,10 +65,10 @@
             <div class="amazon-check">
               <div class="credential-strip">
                 <div>
-                  <span>Amazon credentials</span>
+                  <span>Amazon eligibility</span>
                   <strong id="credential-status">Checking</strong>
                 </div>
-                <button type="button" class="secondary" id="open-credentials">Setup</button>
+                <button type="button" class="secondary" id="open-credentials">Amazon setup</button>
               </div>
 
               <div class="amazon-entry-row">
@@ -80,12 +80,9 @@
                 <label class="field">
                   <span>Condition</span>
                   <select id="condition-type" name="conditionType">
-                    <option value="used_good">Used - Good</option>
-                    <option value="used_very_good">Used - Very Good</option>
-                    <option value="used_like_new">Used - Like New</option>
-                    <option value="used_acceptable">Used - Acceptable</option>
-                    <option value="collectible_good">Collectible - Good</option>
-                    <option value="new_new">New</option>
+                    <option value="used">Used</option>
+                    <option value="new">New</option>
+                    <option value="collectible">Collectible</option>
                   </select>
                 </label>
 
@@ -96,7 +93,7 @@
             </div>
 
             <label class="field">
-              <span>Sell price</span>
+              <span>Asking Price</span>
               <div class="money-input">
                 <span aria-hidden="true">$</span>
                 <input id="sell-price" name="sellPrice" type="number" min="0" step="0.01" value="100.00" inputmode="decimal">
@@ -105,7 +102,7 @@
 
             <div class="split">
               <label class="field">
-                <span>Fee percent</span>
+                <span>Referral Fee</span>
                 <div class="suffix-input">
                   <input id="fee-percent" name="feePercent" type="number" min="0" max="100" step="0.01" value="15" inputmode="decimal">
                   <span aria-hidden="true">%</span>
@@ -113,7 +110,7 @@
               </label>
 
               <label class="field">
-                <span>Fixed fee</span>
+                <span>Variable Closing Fee</span>
                 <div class="money-input">
                   <span aria-hidden="true">$</span>
                   <input id="fixed-fee" name="fixedFee" type="number" min="0" step="0.01" value="1.80" inputmode="decimal">
@@ -122,7 +119,7 @@
             </div>
 
             <label class="field">
-              <span>Shipping materials</span>
+              <span>Shipping Materials</span>
               <div class="money-input">
                 <span aria-hidden="true">$</span>
                 <input id="materials-fee" name="materialsFee" type="number" min="0" step="0.01" value="0.50" inputmode="decimal">
@@ -159,7 +156,7 @@
 
             <div class="split">
               <label class="field">
-                <span>Buy cost</span>
+                <span>Buy Cost</span>
                 <div class="money-input">
                   <span aria-hidden="true">$</span>
                   <input id="buy-cost" name="buyCost" type="number" min="0" step="0.01" value="" placeholder="0.00" inputmode="decimal">
@@ -211,15 +208,15 @@
 
             <dl class="line-items">
               <div>
-                <dt>Percentage fee</dt>
+                <dt>Referral Fee</dt>
                 <dd id="percentage-fee">$0.00</dd>
               </div>
               <div>
-                <dt>Fixed fee</dt>
+                <dt>Variable Closing Fee</dt>
                 <dd id="fixed-fee-output">$0.00</dd>
               </div>
               <div>
-                <dt>Shipping materials</dt>
+                <dt>Shipping Materials</dt>
                 <dd id="materials-fee-output">$0.00</dd>
               </div>
               <div>
@@ -244,45 +241,66 @@
     <dialog class="credential-dialog" id="credential-dialog" aria-labelledby="credential-title">
       <form class="credential-form" method="dialog">
         <div>
-          <p class="kicker">Amazon setup</p>
-          <h2 id="credential-title">SP-API credentials</h2>
+          <p class="dialog-eyebrow">Optional advanced setup</p>
+          <h2 id="credential-title">Amazon Eligibility Setup</h2>
         </div>
 
-        <p class="form-note">Secrets are saved by the desktop app through the operating system credential store. They are not stored in browser local storage.</p>
+        <p class="setup-warning"><strong>Not your Amazon login.</strong> These values come from an Amazon SP-API app after it has been authorized for the seller account. The calculator cannot generate them by itself.</p>
 
-        <label class="field">
-          <span>LWA client ID</span>
-          <input id="credential-lwa-client-id" type="text" autocomplete="off" spellcheck="false">
-        </label>
-
-        <label class="field">
-          <span>LWA client secret</span>
-          <input id="credential-lwa-client-secret" type="password" autocomplete="new-password" spellcheck="false">
-        </label>
-
-        <label class="field">
-          <span>LWA refresh token</span>
-          <input id="credential-lwa-refresh-token" type="password" autocomplete="new-password" spellcheck="false">
-        </label>
-
-        <div class="split">
-          <label class="field">
-            <span>Seller ID</span>
-            <input id="credential-seller-id" type="text" autocomplete="off" spellcheck="false">
-          </label>
-
-          <label class="field">
-            <span>Marketplace ID</span>
-            <input id="credential-marketplace-id" type="text" value="ATVPDKIKX0DER" autocomplete="off" spellcheck="false">
-          </label>
+        <div class="setup-checklist" aria-label="Amazon setup checklist">
+          <h3>Before Amazon checks can work</h3>
+          <ul>
+            <li>Professional Seller account</li>
+            <li>Primary User access in Seller Central</li>
+            <li>Private SP-API app created in Seller Central</li>
+            <li>Private app authorized for the seller account</li>
+            <li>Refresh token generated from Amazon</li>
+          </ul>
         </div>
+
+        <details class="credential-details" id="credential-details">
+          <summary>
+            <span>I already have the Amazon API app values</span>
+            <small>Paste the LWA client ID, client secret, refresh token, and seller info</small>
+          </summary>
+
+          <div class="credential-fields">
+            <label class="field">
+              <span>LWA client ID</span>
+              <input id="credential-lwa-client-id" type="text" placeholder="App client ID, not your email" autocomplete="off" spellcheck="false">
+            </label>
+
+            <label class="field">
+              <span>LWA client secret</span>
+              <input id="credential-lwa-client-secret" type="password" placeholder="App secret, not your password" autocomplete="new-password" spellcheck="false">
+            </label>
+
+            <label class="field">
+              <span>LWA refresh token</span>
+              <input id="credential-lwa-refresh-token" type="password" placeholder="Generated after Authorize app" autocomplete="new-password" spellcheck="false">
+            </label>
+
+            <div class="split">
+              <label class="field">
+                <span>Seller ID / Merchant ID</span>
+                <input id="credential-seller-id" type="text" autocomplete="off" spellcheck="false">
+              </label>
+
+              <label class="field">
+                <span>Marketplace ID</span>
+                <input id="credential-marketplace-id" type="text" value="ATVPDKIKX0DER" autocomplete="off" spellcheck="false">
+              </label>
+            </div>
+
+            <button type="button" id="save-credentials">Save Amazon setup</button>
+          </div>
+        </details>
 
         <p class="credential-message" id="credential-message" role="status"></p>
 
         <div class="dialog-actions">
-          <button type="button" class="secondary" id="clear-credentials">Clear saved</button>
-          <button type="button" class="secondary" id="close-credentials">Cancel</button>
-          <button type="button" id="save-credentials">Save credentials</button>
+          <button type="button" class="secondary" id="clear-credentials">Clear saved setup</button>
+          <button type="button" class="secondary" id="close-credentials">Close</button>
         </div>
       </form>
     </dialog>
