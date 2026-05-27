@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Create a GitHub release when the version tag does not already exist"
+        description: "Create or update the GitHub release for the package version"
         type: boolean
         default: true
   push:
@@ -20,6 +20,8 @@ on:
       - "styles.css"
       - "script.js"
       - "rates.js"
+      - "build/icon.ico"
+      - "build/source-icon.png"
       - "electron/**"
       - "scripts/check-calculator.js"
 
@@ -103,7 +105,7 @@ jobs:
         with:
           path: release-assets
 
-      - name: Create release if needed
+      - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -127,8 +129,39 @@ jobs:
           printf 'Release assets:\n'
           printf '  %s\n' "${assets[@]}"
 
-          gh release create "$TAG" "${assets[@]}" \
-            --repo "$GH_REPO" \
-            --target "$GITHUB_SHA" \
-            --title "Book Resale Calculator $TAG" \
-            --notes "Automated Windows installer release for Book Resale Calculator $VERSION."
+          title="Book Resale Calculator $TAG"
+          notes="Automated Windows installer release for Book Resale Calculator $VERSION. Built from $GITHUB_SHA."
+
+          if gh api "repos/$GH_REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "Moving existing tag $TAG to $GITHUB_SHA."
+            gh api \
+              --method PATCH \
+              "repos/$GH_REPO/git/refs/tags/$TAG" \
+              -f sha="$GITHUB_SHA" \
+              -F force=true >/dev/null
+          else
+            echo "Creating tag $TAG at $GITHUB_SHA."
+            gh api \
+              --method POST \
+              "repos/$GH_REPO/git/refs" \
+              -f ref="refs/tags/$TAG" \
+              -f sha="$GITHUB_SHA" >/dev/null
+          fi
+
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; updating release metadata and replacing assets."
+            gh release edit "$TAG" \
+              --repo "$GH_REPO" \
+              --target "$GITHUB_SHA" \
+              --title "$title" \
+              --notes "$notes"
+            gh release upload "$TAG" "${assets[@]}" \
+              --repo "$GH_REPO" \
+              --clobber
+          else
+            gh release create "$TAG" "${assets[@]}" \
+              --repo "$GH_REPO" \
+              --target "$GITHUB_SHA" \
+              --title "$title" \
+              --notes "$notes"
+          fi
