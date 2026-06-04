@@ -1,7 +1,7 @@
 {
   "name": "book-resale-calculator",
   "version": "2.0.0-alpha.0",
-  "description": "Desktop book resale calculator with USPS Media Mail rates and Amazon eligibility planning.",
+  "description": "Desktop book resale calculator with USPS Media Mail rates and ROI math.",
   "author": "marcmy",
   "main": "electron/main.cjs",
   "private": true,
@@ -39,8 +39,5 @@
   "devDependencies": {
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12"
-  },
-  "dependencies": {
-    "keytar": "^7.9.0"
   }
 }
