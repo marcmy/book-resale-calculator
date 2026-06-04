@@ -215,6 +215,10 @@ legend {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.shipping-row:has(.custom-shipping[hidden]) .shipping-method {
+  grid-column: 1 / -1;
+}
+
 .field {
   display: grid;
   gap: 6px;
