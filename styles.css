@@ -60,7 +60,7 @@ select {
 }
 
 .calculator {
-  width: min(1480px, 100%);
+  width: min(760px, 100%);
 }
 
 .header,
@@ -69,7 +69,7 @@ select {
 .split,
 .actions {
   display: grid;
-  gap: 16px;
+  gap: 10px;
 }
 
 .header {
@@ -85,8 +85,8 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2rem, 4vw, 4.25rem);
-  line-height: 0.98;
+  font-size: 2rem;
+  line-height: 1;
 }
 
 h2 {
@@ -95,8 +95,8 @@ h2 {
 }
 
 .rate-stamp {
-  min-width: 190px;
-  padding: 12px 14px;
+  min-width: 150px;
+  padding: 9px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #eef8f1;
@@ -106,7 +106,7 @@ h2 {
 .header-tools {
   display: grid;
   justify-items: end;
-  gap: 12px;
+  gap: 8px;
 }
 
 .theme-setting {
@@ -131,8 +131,8 @@ h2 {
   position: relative;
   display: grid;
   place-items: center;
-  min-width: 58px;
-  min-height: 34px;
+  min-width: 50px;
+  min-height: 32px;
   border-radius: 6px;
   color: var(--muted);
   cursor: pointer;
@@ -180,13 +180,13 @@ h2 {
 }
 
 .workspace {
-  grid-template-columns: minmax(360px, 0.95fr) minmax(460px, 1.25fr);
+  grid-template-columns: minmax(310px, 0.95fr) minmax(330px, 1.05fr);
   align-items: start;
 }
 
 .panel {
   margin: 0;
-  padding: 16px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -208,7 +208,7 @@ legend {
 
 .inputs {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .split {
@@ -217,7 +217,7 @@ legend {
 
 .field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .field > span {
@@ -226,57 +226,10 @@ legend {
   font-weight: 750;
 }
 
-.amazon-check {
-  display: grid;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-.amazon-entry-row {
-  display: grid;
-  grid-template-columns: minmax(180px, 1.35fr) minmax(130px, 0.65fr) auto;
-  align-items: end;
-  gap: 12px;
-}
-
-.credential-strip {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--field);
-}
-
-.credential-strip span,
-.form-note,
-.credential-message {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-.credential-strip span,
-.credential-strip strong {
-  display: block;
-}
-
-.credential-strip strong {
-  margin-top: 3px;
-  overflow-wrap: anywhere;
-}
-
-.eligibility-action {
-  display: grid;
-  align-content: end;
-}
-
 input,
 select {
   width: 100%;
-  min-height: 44px;
+  min-height: 38px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--field);
@@ -311,7 +264,7 @@ select:focus {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  min-height: 44px;
+  min-height: 38px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--field);
@@ -330,7 +283,7 @@ select:focus {
 
 .money-input span,
 .suffix-input span {
-  min-width: 36px;
+  min-width: 30px;
   color: var(--muted);
   text-align: center;
   font-weight: 800;
@@ -338,7 +291,7 @@ select:focus {
 
 .money-input input,
 .suffix-input input {
-  min-height: 42px;
+  min-height: 36px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -347,7 +300,7 @@ select:focus {
 
 .results {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .results-head {
@@ -358,9 +311,9 @@ select:focus {
 }
 
 .net-value {
-  min-width: 210px;
+  min-width: 140px;
   color: var(--green-dark);
-  font-size: clamp(2.3rem, 5vw, 4.5rem);
+  font-size: 2.7rem;
   font-weight: 900;
   line-height: 1;
   text-align: right;
@@ -368,19 +321,19 @@ select:focus {
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .stat {
-  min-height: 80px;
-  padding: 12px;
+  min-height: 62px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfcfe;
   display: grid;
   align-content: space-between;
-  gap: 18px;
+  gap: 10px;
 }
 
 :root[data-theme="dark"] .stat {
@@ -394,7 +347,7 @@ select:focus {
 }
 
 .stat strong {
-  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+  font-size: 1.15rem;
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
@@ -418,7 +371,7 @@ select:focus {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: #ffffff;
 }
 
@@ -446,7 +399,7 @@ dd {
 }
 
 button {
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 16px;
   border: 1px solid var(--green-dark);
   border-radius: 8px;
@@ -486,126 +439,7 @@ button.secondary:hover {
   color: var(--amber) !important;
 }
 
-.credential-dialog {
-  width: min(680px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  color: var(--text);
-  box-shadow: var(--shadow);
-  overflow: auto;
-}
-
-.credential-dialog::backdrop {
-  background: rgba(13, 17, 23, 0.52);
-}
-
-.credential-form {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-}
-
-.dialog-eyebrow {
-  margin: 0 0 6px;
-  color: var(--green);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.setup-warning {
-  margin: 0;
-  padding: 10px;
-  border: 1px solid rgba(168, 95, 0, 0.28);
-  border-radius: 8px;
-  background: rgba(255, 200, 87, 0.12);
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.setup-checklist {
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--field);
-}
-
-.setup-checklist h3 {
-  margin: 0 0 8px;
-  color: var(--text);
-  font-size: 0.92rem;
-}
-
-.setup-checklist ul {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 18px;
-  margin: 0;
-  padding-left: 18px;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.credential-details {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  overflow: hidden;
-}
-
-.credential-details summary {
-  display: grid;
-  gap: 3px;
-  padding: 10px 12px;
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 850;
-}
-
-.credential-details summary::marker {
-  color: var(--green);
-}
-
-.credential-details summary small {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.credential-fields {
-  display: grid;
-  gap: 10px;
-  padding: 0 12px 10px;
-}
-
-.credential-dialog input[type="text"] {
-  text-transform: none;
-}
-
-.credential-dialog input,
-.credential-dialog button {
-  min-height: 40px;
-}
-
-.form-note,
-.credential-message {
-  margin: 0;
-  line-height: 1.45;
-}
-
-.dialog-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-}
-
-@media (max-width: 820px) {
+@media (max-width: 739px) {
   .app {
     align-items: start;
     padding: 18px;
@@ -630,38 +464,14 @@ button.secondary:hover {
   }
 }
 
-@media (max-width: 1100px) {
-  .app {
-    align-items: start;
-  }
-
-  .amazon-entry-row {
-    grid-template-columns: minmax(0, 1fr) minmax(130px, 0.7fr);
-  }
-
-  .eligibility-action {
-    grid-column: 1 / -1;
-  }
-
-  .eligibility-action button {
-    width: 100%;
-  }
-}
-
-@media (min-width: 1280px) {
-  .workspace {
-    grid-template-columns: minmax(520px, 0.95fr) minmax(620px, 1.25fr);
-  }
-}
-
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .panel {
-    padding: 18px;
+    padding: 12px;
   }
 
   .split,
-  .amazon-entry-row,
   .stat-grid,
+  .workspace,
   .actions {
     grid-template-columns: 1fr;
   }
@@ -672,6 +482,6 @@ button.secondary:hover {
   }
 
   h1 {
-    font-size: 2.35rem;
+    font-size: 1.85rem;
   }
 }

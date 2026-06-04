@@ -62,43 +62,23 @@
           <fieldset class="panel inputs">
             <legend>Inputs</legend>
 
-            <div class="amazon-check">
-              <div class="credential-strip">
-                <div>
-                  <span>Amazon eligibility</span>
-                  <strong id="credential-status">Checking</strong>
+            <div class="split">
+              <label class="field">
+                <span>Asking Price</span>
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input id="sell-price" name="sellPrice" type="number" min="0" step="0.01" value="100.00" inputmode="decimal">
                 </div>
-                <button type="button" class="secondary" id="open-credentials">Amazon setup</button>
-              </div>
+              </label>
 
-              <div class="amazon-entry-row">
-                <label class="field">
-                  <span>ISBN or ASIN</span>
-                  <input id="product-id" name="productId" type="text" value="" placeholder="978..." autocomplete="off" inputmode="text">
-                </label>
-
-                <label class="field">
-                  <span>Condition</span>
-                  <select id="condition-type" name="conditionType">
-                    <option value="used">Used</option>
-                    <option value="new">New</option>
-                    <option value="collectible">Collectible</option>
-                  </select>
-                </label>
-
-                <div class="eligibility-action">
-                  <button type="button" id="check-eligibility">Check Amazon</button>
+              <label class="field">
+                <span>Shipping Materials</span>
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input id="materials-fee" name="materialsFee" type="number" min="0" step="0.01" value="0.50" inputmode="decimal">
                 </div>
-              </div>
+              </label>
             </div>
-
-            <label class="field">
-              <span>Asking Price</span>
-              <div class="money-input">
-                <span aria-hidden="true">$</span>
-                <input id="sell-price" name="sellPrice" type="number" min="0" step="0.01" value="100.00" inputmode="decimal">
-              </div>
-            </label>
 
             <div class="split">
               <label class="field">
@@ -118,14 +98,6 @@
               </label>
             </div>
 
-            <label class="field">
-              <span>Shipping Materials</span>
-              <div class="money-input">
-                <span aria-hidden="true">$</span>
-                <input id="materials-fee" name="materialsFee" type="number" min="0" step="0.01" value="0.50" inputmode="decimal">
-              </div>
-            </label>
-
             <div class="split weight">
               <label class="field">
                 <span>Pounds</span>
@@ -138,21 +110,23 @@
               </label>
             </div>
 
-            <label class="field">
-              <span>Shipping</span>
-              <select id="shipping-mode" name="shippingMode">
-                <option value="media-mail">USPS Media Mail</option>
-                <option value="custom">Custom</option>
-              </select>
-            </label>
+            <div class="split">
+              <label class="field">
+                <span>Shipping</span>
+                <select id="shipping-mode" name="shippingMode">
+                  <option value="media-mail">USPS Media Mail</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
 
-            <label class="field custom-shipping" data-custom-shipping hidden>
-              <span>Custom shipping</span>
-              <div class="money-input">
-                <span aria-hidden="true">$</span>
-                <input id="custom-shipping" name="customShipping" type="number" min="0" step="0.01" value="0" inputmode="decimal">
-              </div>
-            </label>
+              <label class="field custom-shipping" data-custom-shipping hidden>
+                <span>Custom shipping</span>
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input id="custom-shipping" name="customShipping" type="number" min="0" step="0.01" value="0" inputmode="decimal">
+                </div>
+              </label>
+            </div>
 
             <div class="split">
               <label class="field">
@@ -183,11 +157,6 @@
             </div>
 
             <div class="stat-grid">
-              <div class="stat">
-                <span>Amazon currently reports</span>
-                <strong id="eligibility-value">Not checked</strong>
-                <small id="eligibility-detail"></small>
-              </div>
               <div class="stat">
                 <span>Max buy at target ROI</span>
                 <strong id="target-buy">$0.00</strong>
@@ -237,73 +206,6 @@
         </form>
       </section>
     </main>
-
-    <dialog class="credential-dialog" id="credential-dialog" aria-labelledby="credential-title">
-      <form class="credential-form" method="dialog">
-        <div>
-          <p class="dialog-eyebrow">Optional advanced setup</p>
-          <h2 id="credential-title">Amazon Eligibility Setup</h2>
-        </div>
-
-        <p class="setup-warning"><strong>Not your Amazon login.</strong> These values come from an Amazon SP-API app after it has been authorized for the seller account. The calculator cannot generate them by itself.</p>
-
-        <div class="setup-checklist" aria-label="Amazon setup checklist">
-          <h3>Before Amazon checks can work</h3>
-          <ul>
-            <li>Professional Seller account</li>
-            <li>Primary User access in Seller Central</li>
-            <li>Private SP-API app created in Seller Central</li>
-            <li>Private app authorized for the seller account</li>
-            <li>Refresh token generated from Amazon</li>
-          </ul>
-        </div>
-
-        <details class="credential-details" id="credential-details">
-          <summary>
-            <span>I already have the Amazon API app values</span>
-            <small>Paste the LWA client ID, client secret, refresh token, and seller info</small>
-          </summary>
-
-          <div class="credential-fields">
-            <label class="field">
-              <span>LWA client ID</span>
-              <input id="credential-lwa-client-id" type="text" placeholder="App client ID, not your email" autocomplete="off" spellcheck="false">
-            </label>
-
-            <label class="field">
-              <span>LWA client secret</span>
-              <input id="credential-lwa-client-secret" type="password" placeholder="App secret, not your password" autocomplete="new-password" spellcheck="false">
-            </label>
-
-            <label class="field">
-              <span>LWA refresh token</span>
-              <input id="credential-lwa-refresh-token" type="password" placeholder="Generated after Authorize app" autocomplete="new-password" spellcheck="false">
-            </label>
-
-            <div class="split">
-              <label class="field">
-                <span>Seller ID / Merchant ID</span>
-                <input id="credential-seller-id" type="text" autocomplete="off" spellcheck="false">
-              </label>
-
-              <label class="field">
-                <span>Marketplace ID</span>
-                <input id="credential-marketplace-id" type="text" value="ATVPDKIKX0DER" autocomplete="off" spellcheck="false">
-              </label>
-            </div>
-
-            <button type="button" id="save-credentials">Save Amazon setup</button>
-          </div>
-        </details>
-
-        <p class="credential-message" id="credential-message" role="status"></p>
-
-        <div class="dialog-actions">
-          <button type="button" class="secondary" id="clear-credentials">Clear saved setup</button>
-          <button type="button" class="secondary" id="close-credentials">Close</button>
-        </div>
-      </form>
-    </dialog>
 
     <script src="rates.js"></script>
     <script src="script.js"></script>

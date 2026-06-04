@@ -92,190 +92,6 @@
     }
   }
 
-  function getDesktopCredentials() {
-    return window.bookResaleDesktop && window.bookResaleDesktop.credentials
-      ? window.bookResaleDesktop.credentials
-      : null;
-  }
-
-  function setStatusTone(element, tone) {
-    element.classList.toggle("is-warn", tone === "warn");
-    element.classList.toggle("is-negative", tone === "negative");
-  }
-
-  function setCredentialStatus(output, status) {
-    if (!output.credentialStatus) {
-      return;
-    }
-
-    if (!getDesktopCredentials()) {
-      output.credentialStatus.textContent = "Desktop app only";
-      setStatusTone(output.credentialStatus, "warn");
-      return;
-    }
-
-    if (status && status.configured) {
-      output.credentialStatus.textContent = "Connected";
-      setStatusTone(output.credentialStatus, null);
-      return;
-    }
-
-    output.credentialStatus.textContent = "Optional setup";
-    setStatusTone(output.credentialStatus, "warn");
-  }
-
-  async function refreshCredentialStatus(output) {
-    var credentials = getDesktopCredentials();
-
-    if (!credentials) {
-      setCredentialStatus(output, null);
-      return null;
-    }
-
-    try {
-      var status = await credentials.getStatus();
-      setCredentialStatus(output, status);
-      return status;
-    } catch (error) {
-      output.credentialStatus.textContent = "Storage error";
-      setStatusTone(output.credentialStatus, "negative");
-      return null;
-    }
-  }
-
-  function collectCredentialValues(output) {
-    return {
-      lwaClientId: output.credentialLwaClientId.value,
-      lwaClientSecret: output.credentialLwaClientSecret.value,
-      lwaRefreshToken: output.credentialLwaRefreshToken.value,
-      sellerId: output.credentialSellerId.value,
-      marketplaceId: output.credentialMarketplaceId.value
-    };
-  }
-
-  function formatCheckedAt(value) {
-    if (!value) {
-      return "";
-    }
-
-    var date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return "";
-    }
-
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "2-digit"
-    }).format(date);
-  }
-
-  function getAmazonClient() {
-    return window.bookResaleDesktop && window.bookResaleDesktop.amazon
-      ? window.bookResaleDesktop.amazon
-      : null;
-  }
-
-  function renderEligibilityResult(output, result) {
-    var severity = result && result.severity;
-    var checkedAt = result && result.checkedAt ? formatCheckedAt(result.checkedAt) : "";
-    var context = "";
-
-    output.eligibilityValue.textContent = result && result.label ? result.label : "Could not verify";
-    setStatusTone(output.eligibilityValue, severity === "negative" ? "negative" : severity === "warn" ? "warn" : null);
-
-    if (result && result.asin) {
-      context = result.sourceIdentifierType === "ISBN" && result.sourceIdentifier
-        ? result.sourceIdentifier + " -> " + result.asin
-        : result.asin;
-    }
-
-    if (result && result.conditionLabel) {
-      context += (context ? " · " : "") + result.conditionLabel;
-    }
-
-    if (checkedAt) {
-      context += (context ? " · " : "") + checkedAt;
-    }
-
-    output.eligibilityDetail.textContent = result && result.message
-      ? result.message + (context ? " (" + context + ")" : "")
-      : context;
-  }
-
-  function clearCredentialInputs(output) {
-    output.credentialLwaClientId.value = "";
-    output.credentialLwaClientSecret.value = "";
-    output.credentialLwaRefreshToken.value = "";
-    output.credentialSellerId.value = "";
-    output.credentialMarketplaceId.value = "ATVPDKIKX0DER";
-  }
-
-  function initCredentialControls(output) {
-    output.credentialOpenButton.addEventListener("click", function () {
-      output.credentialMessage.textContent = getDesktopCredentials()
-        ? "The calculator works without this. Amazon eligibility checks need a self-authorized SP-API app."
-        : "Open the Electron desktop app to save credentials securely.";
-      output.credentialDialog.showModal();
-    });
-
-    output.credentialCloseButton.addEventListener("click", function () {
-      output.credentialDialog.close();
-    });
-
-    output.credentialSaveButton.addEventListener("click", async function () {
-      var credentials = getDesktopCredentials();
-
-      if (!credentials) {
-        output.credentialMessage.textContent = "Credential storage is only available in the desktop app.";
-        return;
-      }
-
-      output.credentialMessage.textContent = "Saving...";
-
-      try {
-        var status = await credentials.save(collectCredentialValues(output));
-
-        if (!status.configured) {
-          output.credentialMessage.textContent = "Missing: " + status.missing.join(", ");
-          setCredentialStatus(output, status);
-          return;
-        }
-
-        clearCredentialInputs(output);
-        output.credentialMessage.textContent = "Amazon setup saved.";
-        setCredentialStatus(output, status);
-        window.setTimeout(function () {
-          output.credentialDialog.close();
-        }, 500);
-      } catch (error) {
-        output.credentialMessage.textContent = "Could not save credentials.";
-      }
-    });
-
-    output.credentialClearButton.addEventListener("click", async function () {
-      var credentials = getDesktopCredentials();
-
-      if (!credentials) {
-        output.credentialMessage.textContent = "Credential storage is only available in the desktop app.";
-        return;
-      }
-
-      output.credentialMessage.textContent = "Clearing...";
-
-      try {
-        var status = await credentials.clear();
-        clearCredentialInputs(output);
-        output.credentialMessage.textContent = "Saved Amazon setup cleared.";
-        setCredentialStatus(output, status);
-      } catch (error) {
-        output.credentialMessage.textContent = "Could not clear credentials.";
-      }
-    });
-
-    refreshCredentialStatus(output);
-  }
-
   function initThemeControls() {
     var controls = Array.prototype.slice.call(document.querySelectorAll("input[name='theme']"));
     var savedChoice = getSavedThemeChoice();
@@ -373,8 +189,6 @@
   function formValues(form) {
     var data = new FormData(form);
     return {
-      productId: data.get("productId"),
-      conditionType: data.get("conditionType"),
       sellPrice: data.get("sellPrice"),
       feePercent: data.get("feePercent"),
       fixedFee: data.get("fixedFee"),
@@ -427,26 +241,9 @@
       shippingCost: document.getElementById("shipping-cost"),
       billableWeight: document.getElementById("billable-weight"),
       mediaMailEffective: document.querySelector("[data-media-mail-effective]"),
-      credentialStatus: document.getElementById("credential-status"),
-      credentialOpenButton: document.getElementById("open-credentials"),
-      credentialDialog: document.getElementById("credential-dialog"),
-      credentialMessage: document.getElementById("credential-message"),
-      credentialSaveButton: document.getElementById("save-credentials"),
-      credentialClearButton: document.getElementById("clear-credentials"),
-      credentialCloseButton: document.getElementById("close-credentials"),
-      credentialLwaClientId: document.getElementById("credential-lwa-client-id"),
-      credentialLwaClientSecret: document.getElementById("credential-lwa-client-secret"),
-      credentialLwaRefreshToken: document.getElementById("credential-lwa-refresh-token"),
-      credentialSellerId: document.getElementById("credential-seller-id"),
-      credentialMarketplaceId: document.getElementById("credential-marketplace-id"),
-      eligibilityValue: document.getElementById("eligibility-value"),
-      eligibilityDetail: document.getElementById("eligibility-detail"),
-      eligibilityButton: document.getElementById("check-eligibility"),
       copyButton: document.getElementById("copy-summary")
     };
     var lastResult = calculate(DEFAULTS);
-
-    initCredentialControls(output);
 
     function render() {
       var values = formValues(form);
@@ -480,62 +277,6 @@
     form.addEventListener("change", render);
     form.addEventListener("reset", function () {
       window.setTimeout(render, 0);
-    });
-
-    output.eligibilityButton.addEventListener("click", async function () {
-      var values = formValues(form);
-      var productId = (values.productId || "").trim();
-
-      setStatusTone(output.eligibilityValue, null);
-
-      if (!productId) {
-        renderEligibilityResult(output, {
-          severity: "warn",
-          label: "Enter ISBN/ASIN",
-          message: "Enter a product identifier before checking Amazon."
-        });
-        return;
-      }
-
-      var status = await refreshCredentialStatus(output);
-
-      if (!status || !status.configured) {
-        renderEligibilityResult(output, {
-          severity: "warn",
-          label: getDesktopCredentials() ? "Amazon setup needed" : "Desktop required",
-          message: getDesktopCredentials()
-            ? "Amazon checks need a self-authorized SP-API app. The calculator still works without it."
-            : "Open the Electron desktop app to check Amazon eligibility."
-        });
-        return;
-      }
-
-      if (!getAmazonClient()) {
-        renderEligibilityResult(output, {
-          severity: "warn",
-          label: "Desktop required",
-          message: "Open the Electron desktop app to check Amazon eligibility."
-        });
-        return;
-      }
-
-      renderEligibilityResult(output, {
-        label: "Checking...",
-        message: "Contacting Amazon."
-      });
-
-      try {
-        renderEligibilityResult(output, await getAmazonClient().checkEligibility({
-          productId: productId,
-          conditionType: values.conditionType
-        }));
-      } catch (error) {
-        renderEligibilityResult(output, {
-          severity: "warn",
-          label: "Could not verify",
-          message: "The Amazon eligibility check did not complete."
-        });
-      }
     });
 
     output.copyButton.addEventListener("click", function () {
