@@ -7,7 +7,7 @@ Open `index.html` in a browser and enter:
 - Asking price
 - Percentage fee and fixed fee
 - Shipping materials fee
-- Book weight in pounds and ounces
+- Billable shipping weight in whole pounds
 - Optional buy cost and target ROI
 - Auto, light, and dark themes
 

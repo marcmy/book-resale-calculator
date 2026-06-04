@@ -98,19 +98,15 @@
               </label>
             </div>
 
-            <div class="split weight">
-              <label class="field">
-                <span>Pounds</span>
-                <input id="weight-lbs" name="weightLbs" type="number" min="0" step="1" value="1" inputmode="numeric">
+            <div class="shipping-row">
+              <label class="field billable-weight">
+                <span>Billable Weight</span>
+                <div class="suffix-input">
+                  <input id="billable-weight-input" name="billableWeight" type="number" min="0" step="1" value="1" inputmode="numeric">
+                  <span aria-hidden="true">lb</span>
+                </div>
               </label>
 
-              <label class="field">
-                <span>Ounces</span>
-                <input id="weight-oz" name="weightOz" type="number" min="0" max="15.99" step="0.1" value="8" inputmode="decimal">
-              </label>
-            </div>
-
-            <div class="split shipping-row">
               <label class="field shipping-method">
                 <span>Shipping Method</span>
                 <select id="shipping-mode" name="shippingMode">
@@ -153,7 +149,7 @@
                 <p class="kicker">After fees and shipping</p>
                 <h2 id="results-title">Net before book cost</h2>
               </div>
-              <output class="net-value" id="net-value" for="sell-price fee-percent fixed-fee materials-fee weight-lbs weight-oz shipping-mode custom-shipping">$0.00</output>
+              <output class="net-value" id="net-value" for="sell-price fee-percent fixed-fee materials-fee billable-weight-input shipping-mode custom-shipping">$0.00</output>
             </div>
 
             <div class="stat-grid">
@@ -191,10 +187,6 @@
               <div>
                 <dt>Shipping cost</dt>
                 <dd id="shipping-cost">$0.00</dd>
-              </div>
-              <div>
-                <dt>Billable weight</dt>
-                <dd id="billable-weight">0 lb</dd>
               </div>
             </dl>
 

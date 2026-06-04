@@ -10,8 +10,7 @@
     feePercent: 15,
     fixedFee: 1.8,
     materialsFee: 0.5,
-    weightLbs: 1,
-    weightOz: 8,
+    billableWeight: 1,
     shippingMode: "media-mail",
     customShipping: 0,
     buyCost: null,
@@ -126,16 +125,14 @@
     return Math.min(Math.max(value, min), max);
   }
 
-  function getBillablePounds(weightLbs, weightOz) {
-    var pounds = Math.max(0, toNumber(weightLbs, 0));
-    var ounces = Math.max(0, toNumber(weightOz, 0));
-    var totalPounds = pounds + ounces / 16;
+  function getBillablePounds(billableWeight) {
+    var pounds = Math.max(0, toNumber(billableWeight, 0));
 
-    if (totalPounds <= 0) {
+    if (pounds <= 0) {
       return 0;
     }
 
-    return clamp(Math.ceil(totalPounds), 1, MEDIA_MAIL_RATES.length);
+    return clamp(Math.ceil(pounds), 1, MEDIA_MAIL_RATES.length);
   }
 
   function getMediaMailCost(billablePounds) {
@@ -155,7 +152,7 @@
     var buyCost = values.buyCost === "" || values.buyCost === null || values.buyCost === undefined
       ? null
       : Math.max(0, toNumber(values.buyCost, 0));
-    var billablePounds = getBillablePounds(values.weightLbs, values.weightOz);
+    var billablePounds = getBillablePounds(values.billableWeight);
     var customShipping = Math.max(0, toNumber(values.customShipping, DEFAULTS.customShipping));
     var shippingCost = values.shippingMode === "custom"
       ? customShipping
@@ -193,8 +190,7 @@
       feePercent: data.get("feePercent"),
       fixedFee: data.get("fixedFee"),
       materialsFee: data.get("materialsFee"),
-      weightLbs: data.get("weightLbs"),
-      weightOz: data.get("weightOz"),
+      billableWeight: data.get("billableWeight"),
       shippingMode: data.get("shippingMode"),
       customShipping: data.get("customShipping"),
       buyCost: data.get("buyCost"),
@@ -239,7 +235,6 @@
       fixedFee: document.getElementById("fixed-fee-output"),
       materialsFee: document.getElementById("materials-fee-output"),
       shippingCost: document.getElementById("shipping-cost"),
-      billableWeight: document.getElementById("billable-weight"),
       mediaMailEffective: document.querySelector("[data-media-mail-effective]"),
       copyButton: document.getElementById("copy-summary")
     };
@@ -262,8 +257,6 @@
       output.fixedFee.textContent = money(result.fixedFee);
       output.materialsFee.textContent = money(result.materialsFee);
       output.shippingCost.textContent = money(result.shippingCost);
-      output.billableWeight.textContent = result.billablePounds + " lb";
-
       if (output.mediaMailEffective) {
         output.mediaMailEffective.textContent = formatEffectiveDate(MEDIA_MAIL_RATE_DATA.effectiveDate);
       }

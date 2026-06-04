@@ -215,7 +215,13 @@ legend {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.shipping-row:has(.custom-shipping[hidden]) .shipping-method {
+.shipping-row {
+  display: grid;
+  grid-template-columns: minmax(116px, 0.38fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.shipping-row .custom-shipping {
   grid-column: 1 / -1;
 }
 
@@ -474,6 +480,7 @@ button.secondary:hover {
   }
 
   .split,
+  .shipping-row,
   .stat-grid,
   .workspace,
   .actions {
