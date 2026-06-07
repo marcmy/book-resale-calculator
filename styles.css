@@ -217,12 +217,17 @@ legend {
 
 .shipping-row {
   display: grid;
-  grid-template-columns: minmax(116px, 0.38fr) minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(96px, 96px) minmax(220px, 1fr);
+  gap: 8px;
 }
 
 .shipping-row .custom-shipping {
   grid-column: 1 / -1;
+}
+
+.billable-weight > span {
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .field {
