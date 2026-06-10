@@ -1,3 +1,5 @@
+<img width="383" height="356" alt="image" src="https://github.com/user-attachments/assets/828fd8a6-11cb-471f-a599-839f8f604bbd" />
+
 # Book Resale Calculator
 
 A small standalone calculator for quick book resale math.
