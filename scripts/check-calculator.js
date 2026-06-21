@@ -2,6 +2,7 @@ const assert = require("node:assert");
 const fs = require("node:fs");
 const path = require("node:path");
 const calculator = require("../script.js");
+const updater = require("./update-usps-media-mail-rates.js");
 
 async function main() {
   const input = {
@@ -25,7 +26,6 @@ async function main() {
     ...input,
     billableWeight: 2.1
   });
-
   assert.strictEqual(roundedWeight.billablePounds, 3);
 
   const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
@@ -33,6 +33,15 @@ async function main() {
   assert.match(html, /name="billableWeight"/);
   assert.doesNotMatch(html, /name="weightOz"/);
   assert.doesNotMatch(html, /id="billable-weight"/);
+
+  assert.strictEqual(
+    updater.toText("<script>hidden</script><style>hidden</style><p>A &amp; B&nbsp; C &bull; D &#8226; E &#x2022;</p>"),
+    "A & B C D E"
+  );
+  assert.strictEqual(
+    updater.toText("<p>&amp;bull;</p>"),
+    "&bull;"
+  );
 
   console.log("calculation checks passed");
 }
