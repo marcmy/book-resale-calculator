@@ -85,15 +85,11 @@ function extractRetailMediaMailRates(html) {
 }
 
 function toText(html) {
-  return html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&bull;|&#8226;|&#x2022;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const text = (doc.body && doc.body.textContent) || "";
+
+  return text.replace(/\s+/g, " ").trim();
 }
 
 function renderRatesFile(data) {
