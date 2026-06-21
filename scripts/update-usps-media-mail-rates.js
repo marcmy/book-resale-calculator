@@ -4,6 +4,15 @@ const path = require("node:path");
 const NOTICE_URL = "https://pe.usps.com/text/dmm300/notice123.htm";
 const RATES_FILE = path.join(__dirname, "..", "rates.js");
 const EXPECTED_MAX_WEIGHT = 70;
+const HTML_ENTITIES = Object.freeze({
+  amp: "&",
+  apos: "'",
+  bull: "\u2022",
+  gt: ">",
+  lt: "<",
+  nbsp: " ",
+  quot: '"'
+});
 
 async function main() {
   if (typeof fetch !== "function") {
@@ -84,12 +93,44 @@ function extractRetailMediaMailRates(html) {
   return rates;
 }
 
-function toText(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  const text = (doc.body && doc.body.textContent) || "";
+function decodeHtmlEntities(text) {
+  return text.replace(
+    /&(#(?:x[0-9a-f]+|\d+)|[a-z][a-z0-9]+);/gi,
+    (match, entity) => {
+      if (entity[0] !== "#") {
+        const namedEntity = entity.toLowerCase();
+        return Object.hasOwn(HTML_ENTITIES, namedEntity)
+          ? HTML_ENTITIES[namedEntity]
+          : match;
+      }
 
-  return text.replace(/\s+/g, " ").trim();
+      const isHex = entity[1].toLowerCase() === "x";
+      const codePoint = Number.parseInt(entity.slice(isHex ? 2 : 1), isHex ? 16 : 10);
+
+      if (
+        !Number.isInteger(codePoint) ||
+        codePoint < 0 ||
+        codePoint > 0x10ffff ||
+        (codePoint >= 0xd800 && codePoint <= 0xdfff)
+      ) {
+        return match;
+      }
+
+      return String.fromCodePoint(codePoint);
+    }
+  );
+}
+
+function toText(html) {
+  const text = html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, " ")
+    .replace(/<[^>]+>/g, " ");
+
+  return decodeHtmlEntities(text)
+    .replace(/[\u00a0\u2022]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function renderRatesFile(data) {
@@ -121,7 +162,14 @@ ${rateLines.join(",\n")}
 `;
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  decodeHtmlEntities,
+  toText
+};
