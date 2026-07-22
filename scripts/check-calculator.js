@@ -6,6 +6,10 @@ const calculator = require("../script.js");
 const rateServiceModule = require("../electron/usps-rates.cjs");
 const updater = require("./update-usps-media-mail-rates.js");
 
+function normalizeLineEndings(text) {
+  return text.replace(/\r\n?/g, "\n");
+}
+
 async function checkRateService(rateData) {
   const testDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "book-resale-rates-"));
   const remoteRateData = {
@@ -116,10 +120,14 @@ async function main() {
   const rateData = JSON.parse(ratesJsonText);
 
   assert.deepStrictEqual(rateData, calculator.RATE_DATA);
-  assert.strictEqual(updater.renderRatesJson(rateData), ratesJsonText);
+  assert.strictEqual(normalizeLineEndings("first\r\nsecond\r\n"), "first\nsecond\n");
+  assert.strictEqual(
+    updater.renderRatesJson(rateData),
+    normalizeLineEndings(ratesJsonText)
+  );
   assert.strictEqual(
     updater.renderRatesFile(rateData),
-    fs.readFileSync(ratesJavaScriptPath, "utf8")
+    normalizeLineEndings(fs.readFileSync(ratesJavaScriptPath, "utf8"))
   );
   assert.deepStrictEqual(
     rateServiceModule.validateRateData(rateData),
