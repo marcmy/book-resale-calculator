@@ -3,6 +3,7 @@ const path = require("node:path");
 
 const NOTICE_URL = "https://pe.usps.com/text/dmm300/notice123.htm";
 const RATES_FILE = path.join(__dirname, "..", "rates.js");
+const RATES_JSON_FILE = path.join(__dirname, "..", "rates.json");
 const EXPECTED_MAX_WEIGHT = 70;
 const HTML_ENTITIES = Object.freeze({
   amp: "&",
@@ -33,16 +34,25 @@ async function main() {
     effectiveDate,
     rates
   });
+  const nextJsonFile = renderRatesJson({
+    sourceUrl: NOTICE_URL,
+    effectiveDate,
+    rates
+  });
   const currentFile = fs.existsSync(RATES_FILE)
     ? fs.readFileSync(RATES_FILE, "utf8")
     : "";
+  const currentJsonFile = fs.existsSync(RATES_JSON_FILE)
+    ? fs.readFileSync(RATES_JSON_FILE, "utf8")
+    : "";
 
-  if (currentFile === nextFile) {
+  if (currentFile === nextFile && currentJsonFile === nextJsonFile) {
     console.log(`USPS Media Mail rates are already current: ${effectiveDate}.`);
     return;
   }
 
-  fs.writeFileSync(RATES_FILE, nextFile);
+  fs.writeFileSync(RATES_FILE, nextFile, "utf8");
+  fs.writeFileSync(RATES_JSON_FILE, nextJsonFile, "utf8");
   console.log(`Updated USPS Media Mail rates: ${effectiveDate}.`);
 }
 
@@ -162,6 +172,14 @@ ${rateLines.join(",\n")}
 `;
 }
 
+function renderRatesJson(data) {
+  return JSON.stringify({
+    sourceUrl: data.sourceUrl,
+    effectiveDate: data.effectiveDate,
+    rates: data.rates
+  }, null, 2) + "\n";
+}
+
 if (require.main === module) {
   main().catch((error) => {
     console.error(error.message);
@@ -171,5 +189,7 @@ if (require.main === module) {
 
 module.exports = {
   decodeHtmlEntities,
+  renderRatesFile,
+  renderRatesJson,
   toText
 };

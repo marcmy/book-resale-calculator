@@ -22,6 +22,7 @@
       "styles.css",
       "script.js",
       "rates.js",
+      "rates.json",
       "electron/**/*",
       "build/icon.ico",
       "package.json"

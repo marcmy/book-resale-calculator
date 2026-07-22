@@ -27,13 +27,13 @@ jobs:
 
       - name: Commit changed rates
         run: |
-          if git diff --quiet -- rates.js; then
+          if git diff --quiet -- rates.js rates.json; then
             echo "No USPS Media Mail rate changes."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add rates.js
+          git add rates.js rates.json
           git commit -m "Update USPS Media Mail rates"
           git push origin HEAD:main
