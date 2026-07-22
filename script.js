@@ -2,8 +2,10 @@
   "use strict";
 
   var root = typeof globalThis !== "undefined" ? globalThis : window;
+  var EXPECTED_MEDIA_MAIL_RATES = 70;
   var MEDIA_MAIL_RATE_DATA = getRateData();
   var MEDIA_MAIL_RATES = MEDIA_MAIL_RATE_DATA.rates;
+  var api;
 
   var DEFAULTS = {
     sellPrice: 100,
@@ -28,7 +30,70 @@
       throw new Error("USPS Media Mail rates are not available.");
     }
 
-    return rateData;
+    return normalizeRateData(rateData);
+  }
+
+  function normalizeRateData(rateData) {
+    if (
+      !rateData ||
+      typeof rateData !== "object" ||
+      typeof rateData.sourceUrl !== "string" ||
+      typeof rateData.effectiveDate !== "string" ||
+      !Array.isArray(rateData.rates) ||
+      rateData.rates.length !== EXPECTED_MEDIA_MAIL_RATES
+    ) {
+      throw new Error("USPS Media Mail rate data is invalid.");
+    }
+
+    var rates = rateData.rates.map(function (rate) {
+      if (!Number.isFinite(rate) || rate <= 0) {
+        throw new Error("USPS Media Mail rate data contains an invalid price.");
+      }
+
+      return rate;
+    });
+
+    return {
+      sourceUrl: rateData.sourceUrl,
+      effectiveDate: rateData.effectiveDate,
+      rates: rates
+    };
+  }
+
+  function sameRateData(left, right) {
+    return left.sourceUrl === right.sourceUrl &&
+      left.effectiveDate === right.effectiveDate &&
+      left.rates.length === right.rates.length &&
+      left.rates.every(function (rate, index) {
+        return rate === right.rates[index];
+      });
+  }
+
+  function setRateData(rateData) {
+    var next = normalizeRateData(rateData);
+    var currentTimestamp = new Date(MEDIA_MAIL_RATE_DATA.effectiveDate).getTime();
+    var nextTimestamp = new Date(next.effectiveDate).getTime();
+
+    if (!Number.isFinite(nextTimestamp)) {
+      throw new Error("USPS Media Mail rate effective date is invalid.");
+    }
+    if (Number.isFinite(currentTimestamp) && nextTimestamp < currentTimestamp) {
+      return false;
+    }
+    if (sameRateData(MEDIA_MAIL_RATE_DATA, next)) {
+      return false;
+    }
+
+    MEDIA_MAIL_RATE_DATA = next;
+    MEDIA_MAIL_RATES = next.rates;
+    root.USPS_MEDIA_MAIL = next;
+
+    if (api) {
+      api.RATE_DATA = MEDIA_MAIL_RATE_DATA;
+      api.MEDIA_MAIL_RATES = MEDIA_MAIL_RATES;
+    }
+
+    return true;
   }
 
   function money(value) {
@@ -266,6 +331,16 @@
       setTone(output.profit, values.buyCost === "" ? NaN : result.profit);
     }
 
+    function applyRateData(rateData) {
+      try {
+        if (setRateData(rateData)) {
+          render();
+        }
+      } catch (error) {
+        console.warn("Ignored invalid USPS rate update:", error.message);
+      }
+    }
+
     form.addEventListener("input", render);
     form.addEventListener("change", render);
     form.addEventListener("reset", function () {
@@ -286,29 +361,31 @@
     });
 
     render();
+
+    if (root.uspsRates) {
+      root.uspsRates.onUpdated(applyRateData);
+      root.uspsRates.getCurrent().then(applyRateData).catch(function (error) {
+        console.warn("Could not load cached USPS rates:", error.message);
+      });
+    }
   }
 
-  if (typeof window !== "undefined") {
-    var api = {
-      RATE_DATA: MEDIA_MAIL_RATE_DATA,
-      MEDIA_MAIL_RATES: MEDIA_MAIL_RATES,
-      calculate: calculate,
-      getBillablePounds: getBillablePounds,
-      getMediaMailCost: getMediaMailCost
-    };
+  api = {
+    RATE_DATA: MEDIA_MAIL_RATE_DATA,
+    MEDIA_MAIL_RATES: MEDIA_MAIL_RATES,
+    calculate: calculate,
+    getBillablePounds: getBillablePounds,
+    getMediaMailCost: getMediaMailCost,
+    setRateData: setRateData
+  };
 
+  if (typeof window !== "undefined") {
     window.BookResaleCalculator = api;
     window.BookMarginCalculator = api;
     window.addEventListener("DOMContentLoaded", init);
   }
 
   if (typeof module !== "undefined") {
-    module.exports = {
-      RATE_DATA: MEDIA_MAIL_RATE_DATA,
-      MEDIA_MAIL_RATES: MEDIA_MAIL_RATES,
-      calculate: calculate,
-      getBillablePounds: getBillablePounds,
-      getMediaMailCost: getMediaMailCost
-    };
+    module.exports = api;
   }
 })();

@@ -20,6 +20,7 @@ on:
       - "styles.css"
       - "script.js"
       - "rates.js"
+      - "rates.json"
       - "build/icon.ico"
       - "build/source-icon.png"
       - "electron/**"
