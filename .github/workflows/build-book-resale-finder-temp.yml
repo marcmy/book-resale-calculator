@@ -1,8 +1,9 @@
 name: Temporary Book Resale Finder build
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - build/book-resale-finder-v1.0.0
   workflow_dispatch:
 
 permissions:
