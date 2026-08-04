@@ -1,0 +1,56 @@
+name: Temporary Book Resale Finder build
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out build branch
+        uses: actions/checkout@v4
+
+      - name: Reconstruct source archive
+        shell: pwsh
+        run: |
+          $parts = Get-ChildItem .tmp-book-resale-finder/part*.txt | Sort-Object Name
+          $base64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ''
+          [IO.File]::WriteAllBytes('BookResaleFinder-source.zip', [Convert]::FromBase64String($base64))
+          Expand-Archive 'BookResaleFinder-source.zip' -DestinationPath 'source' -Force
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: source/book-resale-finder/requirements-build.txt
+
+      - name: Install dependencies
+        working-directory: source/book-resale-finder
+        run: python -m pip install -r requirements-build.txt pytest
+
+      - name: Build executable
+        working-directory: source/book-resale-finder
+        run: python -m PyInstaller --noconfirm --clean BookResaleFinder.spec
+
+      - name: Assemble portable package
+        shell: pwsh
+        run: |
+          New-Item package -ItemType Directory -Force | Out-Null
+          Copy-Item source/book-resale-finder/dist/BookResaleFinder.exe package/
+          Copy-Item source/book-resale-finder/config.yaml package/
+          Copy-Item source/book-resale-finder/masterlist.csv package/
+          New-Item package/output -ItemType Directory -Force | Out-Null
+          Compress-Archive -Path package/* -DestinationPath BookResaleFinder-Windows-v1.0.0.zip -Force
+
+      - name: Upload compiled package
+        uses: actions/upload-artifact@v4
+        with:
+          name: BookResaleFinder-Windows-v1.0.0
+          path: BookResaleFinder-Windows-v1.0.0.zip
+          if-no-files-found: error
