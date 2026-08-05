@@ -69,6 +69,10 @@ app.whenReady().then(() => {
   refreshTimer = setInterval(() => void refreshRates(), REFRESH_POLL_INTERVAL_MS);
   refreshTimer.unref();
 
+  if (process.env.BRC_SMOKE_TEST === "1") {
+    setTimeout(() => app.quit(), 1500);
+  }
+
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
