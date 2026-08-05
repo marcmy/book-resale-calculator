@@ -1,6 +1,6 @@
 {
   "name": "book-resale-calculator",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "description": "Desktop book resale calculator with USPS Media Mail rates and ROI math.",
   "author": "marcmy",
   "main": "electron/main.cjs",
@@ -9,11 +9,12 @@
     "start": "electron .",
     "check": "node scripts/check-calculator.js",
     "update:usps": "node scripts/update-usps-media-mail-rates.js",
-    "build:win": "electron-builder --win nsis"
+    "build:win": "electron-builder --win portable"
   },
   "build": {
     "appId": "com.marcmy.bookresalecalculator",
     "productName": "Book Resale Calculator",
+    "artifactName": "BookResaleCalculator-${version}-Windows-x64.${ext}",
     "directories": {
       "output": "dist"
     },
@@ -29,12 +30,14 @@
     ],
     "win": {
       "icon": "build/icon.ico",
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     }
   },
   "devDependencies": {
