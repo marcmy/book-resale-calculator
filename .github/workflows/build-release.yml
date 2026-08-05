@@ -9,6 +9,20 @@ on:
         description: "Create or update the GitHub release for the package version"
         type: boolean
         default: true
+  pull_request:
+    paths:
+      - ".github/workflows/build-release.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "index.html"
+      - "styles.css"
+      - "script.js"
+      - "rates.js"
+      - "rates.json"
+      - "build/icon.ico"
+      - "build/source-icon.png"
+      - "electron/**"
+      - "scripts/check-calculator.js"
   push:
     branches:
       - main
@@ -27,7 +41,7 @@ on:
       - "scripts/check-calculator.js"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: build-release-${{ github.ref }}
@@ -35,7 +49,7 @@ concurrency:
 
 jobs:
   build-windows:
-    name: Build Windows installer
+    name: Build portable Windows executable
     runs-on: windows-latest
     outputs:
       version: ${{ steps.meta.outputs.version }}
@@ -70,28 +84,45 @@ jobs:
       - name: Run calculator checks
         run: npm run check
 
-      - name: Build Windows installer
+      - name: Build portable Windows executable
         run: npm run build:win -- --publish never
 
-      - name: Verify release assets
+      - name: Verify and checksum portable executable
         shell: pwsh
         run: |
-          $assets = Get-ChildItem -Path dist -File -Include *.exe,*.blockmap,latest*.yml -Recurse
-          if (-not $assets) {
-            throw "No installer release assets were created under dist/."
+          $executables = @(Get-ChildItem -Path dist -File -Filter *.exe)
+          if ($executables.Count -ne 1) {
+            throw "Expected exactly one portable EXE under dist/, found $($executables.Count)."
           }
 
-          $assets | ForEach-Object { $_.FullName }
+          $exe = $executables[0]
+          if ($exe.Name -match 'Setup|Installer') {
+            throw "The build produced an installer instead of a portable executable: $($exe.Name)"
+          }
 
-      - name: Upload Windows installer artifact
+          $hash = (Get-FileHash -Path $exe.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $($exe.Name)" | Set-Content -Path "$($exe.FullName).sha256" -Encoding ascii
+          Write-Host "Portable executable: $($exe.FullName)"
+          Write-Host "SHA-256: $hash"
+
+      - name: Smoke-test portable executable
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path dist -File -Filter *.exe | Select-Object -First 1
+          $env:BRC_SMOKE_TEST = "1"
+          $process = Start-Process -FilePath $exe.FullName -PassThru -Wait
+          if ($process.ExitCode -ne 0) {
+            throw "Portable executable smoke test failed with exit code $($process.ExitCode)."
+          }
+
+      - name: Upload portable Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Book-Resale-Calculator-win-${{ steps.meta.outputs.version }}
+          name: Book-Resale-Calculator-portable-${{ steps.meta.outputs.version }}
           if-no-files-found: error
           path: |
             dist/*.exe
-            dist/*.blockmap
-            dist/latest*.yml
+            dist/*.exe.sha256
 
   release:
     name: Publish GitHub release
@@ -101,7 +132,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download Windows installer artifact
+      - name: Download portable Windows artifact
         uses: actions/download-artifact@v4
         with:
           path: release-assets
@@ -126,7 +157,7 @@ jobs:
           printf '  %s\n' "${assets[@]}"
 
           title="Book Resale Calculator $TAG"
-          notes="Automated Windows installer release for Book Resale Calculator $VERSION. Built from $GITHUB_SHA."
+          notes="Portable Windows release for Book Resale Calculator $VERSION. No installation is required: download the EXE and run it. Built from $GITHUB_SHA."
 
           if gh api "repos/$GH_REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
             echo "Moving existing tag $TAG to $GITHUB_SHA."
