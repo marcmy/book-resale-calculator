@@ -1,0 +1,40 @@
+name: Sync portable package lock
+
+on:
+  push:
+    branches:
+      - feature/portable-exe-v2.0.0-alpha.1
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v5
+        with:
+          ref: feature/portable-exe-v2.0.0-alpha.1
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Update package lock
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Remove temporary workflow
+        run: rm .github/workflows/sync-portable-lock.yml
+
+      - name: Commit synchronized lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json .github/workflows/sync-portable-lock.yml
+          git commit -m "Sync lockfile for portable build"
+          git push origin HEAD:feature/portable-exe-v2.0.0-alpha.1
