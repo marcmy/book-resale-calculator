@@ -12,6 +12,15 @@ const APP_ENTRY_URL = pathToFileURL(APP_ENTRY_PATH).href;
 let rateService;
 let refreshTimer;
 
+function lockDownRendererNavigation(mainWindow) {
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  mainWindow.webContents.on("will-navigate", (event, navigationUrl) => {
+    if (navigationUrl !== APP_ENTRY_URL) {
+      event.preventDefault();
+    }
+  });
+}
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 780,
@@ -30,6 +39,7 @@ function createWindow() {
   });
 
   Menu.setApplicationMenu(null);
+  lockDownRendererNavigation(mainWindow);
   mainWindow.loadFile(APP_ENTRY_PATH);
 }
 
