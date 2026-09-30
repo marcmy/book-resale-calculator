@@ -45,6 +45,6 @@
     "electron-builder": "^26.15.3"
   },
   "overrides": {
-    "js-yaml": "5.2.2"
+    "js-yaml": "5.4.2"
   }
 }
