@@ -3,7 +3,7 @@
 
   var USPS_MEDIA_MAIL = {
     sourceUrl: "https://pe.usps.com/text/dmm300/notice123.htm",
-    effectiveDate: "July 12, 2026",
+    effectiveDate: "October 04, 2026",
     rates: [
       4.39, 5.13, 5.86, 6.60, 7.34, 8.08, 8.81, 9.55, 10.29, 11.02,
       11.76, 12.50, 13.23, 13.97, 14.71, 15.44, 16.18, 16.92, 17.65, 18.39,
