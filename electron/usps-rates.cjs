@@ -30,7 +30,7 @@ function effectiveDateTimestamp(value) {
   }
 
   const match = value.match(
-    /^(January|February|March|April|May|June|July|August|September|October|November|December) ([1-9]|[12]\d|3[01]), (\d{4})$/
+    /^(January|February|March|April|May|June|July|August|September|October|November|December) (0?[1-9]|[12]\d|3[01]), (\d{4})$/
   );
 
   if (!match) {
