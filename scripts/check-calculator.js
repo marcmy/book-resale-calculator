@@ -12,13 +12,24 @@ function normalizeLineEndings(text) {
 
 async function checkRateService(rateData) {
   const testDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "book-resale-rates-"));
+  // Always simulate rates newer than the bundled table. A fixed date becomes
+  // stale as the real USPS table advances and makes this refresh test fail.
+  const dayMs = 24 * 60 * 60 * 1000;
+  const remoteEffectiveTime =
+    rateServiceModule.effectiveDateTimestamp(rateData.effectiveDate) + dayMs;
+  const remoteEffectiveDate = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  }).format(new Date(remoteEffectiveTime));
   const remoteRateData = {
     ...rateData,
-    effectiveDate: "July 13, 2026",
+    effectiveDate: remoteEffectiveDate,
     rates: rateData.rates.map((rate) => Number((rate + 0.01).toFixed(2)))
   };
   let fetchCalls = 0;
-  let now = Date.UTC(2026, 6, 22, 12);
+  let now = remoteEffectiveTime + 9 * dayMs;
   const app = {
     getAppPath: () => path.join(__dirname, ".."),
     getPath: (name) => {
